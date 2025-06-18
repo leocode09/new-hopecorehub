@@ -9,10 +9,7 @@ extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
-enabled = true
 port = 54322
-shadow_port = 54320
-major_version = 15
 
 [db.pooler]
 enabled = false
@@ -23,35 +20,49 @@ max_client_conn = 100
 
 [realtime]
 enabled = true
-ip_version = "ipv4"
 port = 54323
-max_header_length = 4096
+tenant_id = "realtime-dev"
 
 [studio]
 enabled = true
-port = 54323
-api_url = "http://127.0.0.1:54321"
-openai_api_key = "env(OPENAI_API_KEY)"
+port = 54324
 
 [inbucket]
 enabled = true
-port = 54324
-smtp_port = 54325
-pop3_port = 54326
+port = 54325
+smtp_port = 54326
+pop3_port = 54327
 
-[functions.mahoro-chat]
-verify_jwt = false
+[storage]
+enabled = true
+port = 54326
+file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-port = 54321
-site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["https://nwqxsdztylcewebcjsdi.supabase.co"]
+port = 54327
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://nwqxsdztylcewebcjsdi.supabase.co/auth/v1/callback"]
 jwt_expiry = 3600
-enable_signup = true
-enable_confirmations = false
+refresh_token_rotation_enabled = true
+secure_password_change_enabled = true
+enable_manual_linking = false
 
 [auth.email]
 enable_signup = true
 double_confirm_changes = true
-enable_confirmations = false
+enable_confirmations = true
+
+[auth.email.template.confirmation]
+subject = "Welcome to HopeCore Hub - Confirm Your Account"
+content_path = ""
+
+[functions.send-confirmation-email]
+verify_jwt = false
+
+[edge_runtime]
+enabled = true
+port = 54328
+
+[[functions]]
+name = "send-confirmation-email"

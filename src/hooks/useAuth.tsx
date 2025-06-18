@@ -22,29 +22,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle specific auth events
+        if (event === 'SIGNED_IN' && session?.user) {
+          toast({
+            title: "Welcome back!",
+            description: "You've successfully signed in.",
+          });
+        } else if (event === 'SIGNED_OUT') {
+          toast({
+            title: "Signed out",
+            description: "You've been successfully signed out.",
+          });
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
+        }
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting initial session:', error);
+        }
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-    return () => subscription.unsubscribe();
-  }, []);
+    getInitialSession();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
+      console.log('Attempting to sign up user:', email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
@@ -55,23 +95,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
+        console.error('Sign up error:', error);
         toast({
           title: "Sign up failed",
           description: error.message,
           variant: "destructive"
         });
-      } else {
+        return { error };
+      }
+
+      if (data.user && !data.session) {
+        // User needs to confirm email
         toast({
           title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration."
+          description: "We've sent you a confirmation link to complete your registration.",
+        });
+      } else if (data.session) {
+        // User was signed up and signed in immediately
+        toast({
+          title: "Welcome to HopeCore Hub!",
+          description: "Your account has been created successfully.",
         });
       }
 
-      return { error };
+      return { error: null };
     } catch (error: any) {
+      console.error('Unexpected sign up error:', error);
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
       return { error };
@@ -80,29 +132,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
+      console.log('Attempting to sign in user:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
         password
       });
 
       if (error) {
+        console.error('Sign in error:', error);
+        
+        let errorMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        }
+
         toast({
           title: "Sign in failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive"
         });
-      } else {
-        toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in."
-        });
+        return { error };
       }
 
-      return { error };
+      console.log('Sign in successful:', data.user?.email);
+      return { error: null };
     } catch (error: any) {
+      console.error('Unexpected sign in error:', error);
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
       return { error };
@@ -111,15 +172,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out."
-      });
+      console.log('Signing out user');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        toast({
+          title: "Sign out failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
     } catch (error: any) {
+      console.error('Unexpected sign out error:', error);
       toast({
         title: "Sign out failed",
-        description: error.message,
+        description: "An unexpected error occurred during sign out.",
         variant: "destructive"
       });
     }
