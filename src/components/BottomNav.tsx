@@ -26,14 +26,14 @@ const BottomNav = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center p-3 h-auto space-y-2 touch-target ${
+              className={`flex flex-col items-center p-2 h-auto space-y-1 touch-target ${
                 isActive 
                   ? "text-[#9E78E9] bg-[#D3E4FD]/30" 
                   : "text-gray-600 hover:text-[#9E78E9] hover:bg-[#D3E4FD]/20"
               }`}
             >
-              <Icon className="w-16 h-16" />
-              <span className="text-sm font-medium">{label}</span>
+              <Icon className="w-6 h-6" />
+              <span className="text-xs font-medium">{label}</span>
             </Button>
           );
         })}

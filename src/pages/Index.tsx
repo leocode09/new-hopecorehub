@@ -32,9 +32,9 @@ const Index = () => {
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            className="w-10 h-10 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+            className="w-12 h-12 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
           >
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
           </Button>
         </div>
 
