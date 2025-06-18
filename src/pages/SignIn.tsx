@@ -5,18 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This will be connected to Supabase authentication
-    console.log("Sign in attempt:", { email, password });
-    navigate("/");
+    setLoading(true);
+    
+    try {
+      const { error } = await signIn(email, password);
+      if (!error) {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,6 +37,7 @@ const SignIn = () => {
             variant="ghost" 
             onClick={() => navigate("/welcome")}
             className="absolute top-4 left-4 p-2"
+            disabled={loading}
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
@@ -52,6 +63,7 @@ const SignIn = () => {
                 placeholder="Enter your email or phone"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
                 required
               />
             </div>
@@ -64,16 +76,25 @@ const SignIn = () => {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
                 required
               />
             </div>
             
             <Button 
               type="submit"
+              disabled={loading}
               className="w-full bg-[#9E78E9] hover:bg-[#8B69D6] text-white"
               size="lg"
             >
-              Sign In
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
             
             <div className="text-center space-y-2">
@@ -96,12 +117,6 @@ const SignIn = () => {
               </p>
             </div>
           </form>
-          
-          <div className="mt-6 p-4 bg-[#D3E4FD]/30 rounded-lg">
-            <p className="text-xs text-gray-600 text-center">
-              💜 Authentication will be activated when we connect Supabase
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

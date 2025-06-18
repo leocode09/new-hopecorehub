@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfilePictureSection from "@/components/profile/ProfilePictureSection";
@@ -15,6 +16,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
+  const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -48,7 +50,12 @@ const Profile = () => {
   }, [profile]);
 
   const handleSave = async () => {
-    await updateProfile(formData);
+    setSaving(true);
+    try {
+      await updateProfile(formData);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleProfilePictureUpload = async (url: string) => {
@@ -79,7 +86,17 @@ const Profile = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 text-[#9E78E9] animate-spin mx-auto" />
+          <div>
+            <h2 className="text-lg font-semibold text-white">Loading Profile</h2>
+            <p className="text-sm text-gray-400">Getting your information ready...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -108,9 +125,17 @@ const Profile = () => {
 
         <Button 
           onClick={handleSave} 
+          disabled={saving}
           className="w-full bg-[#9E78E9] hover:bg-[#8B69D6] rounded-2xl h-14 text-lg font-semibold mb-6"
         >
-          Save Profile
+          {saving ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Saving Profile...
+            </>
+          ) : (
+            'Save Profile'
+          )}
         </Button>
 
         <UserInfo userEmail={user?.email} />
