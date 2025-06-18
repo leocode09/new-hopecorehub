@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Camera, Upload, Crop } from 'lucide-react';
+import { Upload, Crop } from 'lucide-react';
 
 interface ProfilePictureUploadProps {
   onUploadComplete: (url: string) => void;
@@ -51,17 +51,17 @@ const ProfilePictureUpload = ({ onUploadComplete, currentImageUrl }: ProfilePict
         const ctx = canvas.getContext('2d')!;
         const size = Math.min(img.width, img.height);
         
-        canvas.width = 300;
-        canvas.height = 300;
+        canvas.width = 400;
+        canvas.height = 400;
         
         const startX = (img.width - size) / 2;
         const startY = (img.height - size) / 2;
         
-        ctx.drawImage(img, startX, startY, size, size, 0, 0, 300, 300);
+        ctx.drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
         
         canvas.toBlob((blob) => {
           resolve(blob!);
-        }, 'image/jpeg', 0.8);
+        }, 'image/jpeg', 0.9);
       };
       img.src = preview;
     });
@@ -112,14 +112,16 @@ const ProfilePictureUpload = ({ onUploadComplete, currentImageUrl }: ProfilePict
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Camera className="w-4 h-4 mr-2" />
-          {currentImageUrl ? 'Change Photo' : 'Upload Photo'}
+        <Button 
+          variant="outline" 
+          className="bg-transparent border-[#9E78E9] text-[#9E78E9] hover:bg-[#9E78E9] hover:text-white px-6 py-3 rounded-full"
+        >
+          Upload Photo
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle>Update Profile Picture</DialogTitle>
+          <DialogTitle className="text-white">Update Profile Picture</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
@@ -133,8 +135,7 @@ const ProfilePictureUpload = ({ onUploadComplete, currentImageUrl }: ProfilePict
           {!preview ? (
             <Button 
               onClick={() => fileInputRef.current?.click()}
-              className="w-full"
-              variant="outline"
+              className="w-full bg-[#9E78E9] hover:bg-[#8B69D6]"
             >
               <Upload className="w-4 h-4 mr-2" />
               Select Image
@@ -142,14 +143,17 @@ const ProfilePictureUpload = ({ onUploadComplete, currentImageUrl }: ProfilePict
           ) : (
             <div className="space-y-4">
               <div className="text-center">
-                <img 
-                  src={preview} 
-                  alt="Preview" 
-                  className="mx-auto max-w-full max-h-48 rounded-lg"
-                />
-                <p className="text-sm text-gray-600 mt-2 flex items-center justify-center">
+                <div className="relative mx-auto w-48 h-48 rounded-lg overflow-hidden bg-gray-700">
+                  <img 
+                    src={preview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 border-2 border-dashed border-[#9E78E9] rounded-lg"></div>
+                </div>
+                <p className="text-sm text-gray-400 mt-3 flex items-center justify-center">
                   <Crop className="w-4 h-4 mr-1" />
-                  Image will be cropped to square
+                  Image will be cropped to square automatically
                 </p>
               </div>
               
@@ -159,7 +163,7 @@ const ProfilePictureUpload = ({ onUploadComplete, currentImageUrl }: ProfilePict
                 <Button 
                   onClick={() => fileInputRef.current?.click()}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 bg-transparent border-gray-600 text-white hover:bg-gray-700"
                 >
                   Choose Different
                 </Button>

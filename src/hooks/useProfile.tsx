@@ -14,6 +14,7 @@ interface Profile {
   profile_picture_url: string | null;
   uses_avatar: boolean;
   anonymous_by_default: boolean;
+  gender?: string | null;
 }
 
 export const useProfile = () => {
