@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import BottomNav from "@/components/BottomNav";
+import AccessibilitySettings from "@/components/accessibility/AccessibilitySettings";
 import { useTheme } from "@/components/ThemeProvider";
 import { Settings as SettingsIcon, Moon, Sun, Globe, Volume2, Bell, Shield } from "lucide-react";
 
@@ -14,12 +15,17 @@ const Settings = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
-        <div className="text-center mb-6">
+        <header className="text-center mb-6">
           <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
             <SettingsIcon className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-[#9E78E9]">Settings</h1>
           <p className="text-gray-600 dark:text-gray-300">Customize your experience</p>
+        </header>
+
+        {/* Accessibility Settings */}
+        <div className="mb-6">
+          <AccessibilitySettings />
         </div>
 
         {/* Appearance */}
@@ -38,24 +44,6 @@ const Settings = () => {
                 checked={theme === "dark"}
                 onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
               />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Font Size</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Adjust text size for better readability</p>
-              </div>
-              <Button variant="outline" size="sm">
-                Medium
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>High Contrast</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Improve visibility for accessibility</p>
-              </div>
-              <Switch />
             </div>
           </CardContent>
         </Card>

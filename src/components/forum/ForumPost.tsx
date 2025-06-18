@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import ReplyButton from "./ReplyButton";
 import ReplyList from "./ReplyList";
+import ForumPostActions from "./ForumPostActions";
 import { ForumPost as ForumPostType } from "@/hooks/useForumPosts";
 
 interface ForumPostProps {
   post: ForumPostType;
   onToggleLike: (postId: string) => void;
   onReplyAdded: () => void;
+  onPostUpdated: () => void;
 }
 
-const ForumPost = ({ post, onToggleLike, onReplyAdded }: ForumPostProps) => {
+const ForumPost = ({ post, onToggleLike, onReplyAdded, onPostUpdated }: ForumPostProps) => {
   const [showReplies, setShowReplies] = useState(false);
 
   const formatTimeAgo = (dateString: string) => {
@@ -37,7 +39,7 @@ const ForumPost = ({ post, onToggleLike, onReplyAdded }: ForumPostProps) => {
 
   const handleReplyAdded = () => {
     onReplyAdded();
-    setShowReplies(true); // Show replies after adding one
+    setShowReplies(true);
   };
 
   return (
@@ -45,20 +47,37 @@ const ForumPost = ({ post, onToggleLike, onReplyAdded }: ForumPostProps) => {
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Post Header */}
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#9E78E9] to-[#8B69D6] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">A</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#9E78E9] to-[#8B69D6] rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold" aria-hidden="true">A</span>
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Anonymous</p>
+                <p className="text-xs text-gray-500">
+                  <time dateTime={post.created_at}>
+                    {formatTimeAgo(post.created_at)}
+                  </time>
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium text-gray-900 dark:text-gray-100">Anonymous</p>
-              <p className="text-xs text-gray-500">{formatTimeAgo(post.created_at)}</p>
-            </div>
+            
+            {post.user_id && (
+              <ForumPostActions
+                postId={post.id}
+                currentContent={post.content}
+                userId={post.user_id}
+                onUpdate={onPostUpdated}
+              />
+            )}
           </div>
 
           {/* Post Content */}
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {post.content}
-          </p>
+          <div className="prose dark:prose-invert max-w-none">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              {post.content}
+            </p>
+          </div>
 
           {/* Post Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
@@ -74,7 +93,9 @@ const ForumPost = ({ post, onToggleLike, onReplyAdded }: ForumPostProps) => {
               >
                 <Heart 
                   className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-[#9E78E9]' : ''}`} 
+                  aria-hidden="true"
                 />
+                <span className="sr-only">{post.isLiked ? 'Unlike' : 'Like'} this post.</span>
                 {post.likes_count || 0}
               </Button>
               
@@ -92,6 +113,7 @@ const ForumPost = ({ post, onToggleLike, onReplyAdded }: ForumPostProps) => {
               size="sm" 
               onClick={handleReplyClick}
               className="text-[#9E78E9] hover:bg-[#9E78E9]/10 text-sm"
+              aria-label={`${showReplies ? 'Hide' : 'View'} replies to this post`}
             >
               {showReplies ? 'Hide Replies' : 'View Replies'}
             </Button>
