@@ -13,12 +13,14 @@ import ProfileAction from "@/components/ProfileAction";
 import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { User, Edit, Shield, Camera } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { User, Edit, Shield, Camera, Moon, Sun } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
+  const { theme, setTheme } = useTheme();
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -67,6 +69,10 @@ const Profile = () => {
     await updateProfile({ uses_avatar: useAvatar });
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   const getDisplayName = () => {
     if (profile?.nickname) return profile.nickname;
     if (profile?.full_name) return profile.full_name;
@@ -87,9 +93,18 @@ const Profile = () => {
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <ProfileAction />
+          <div className="scale-[2] origin-left">
+            <ProfileAction />
+          </div>
           <h1 className="text-3xl font-bold text-[#9E78E9] text-center flex-1">My Profile</h1>
-          <div className="w-10"></div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="w-10 h-10 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
         </div>
 
         {/* Profile Picture Section */}
