@@ -1,10 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Bot, Settings, Users, Heart, Shield, Phone, BookOpen } from "lucide-react";
+import { MessageSquare, Bot, Settings, Users, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SOSButton from "@/components/SOSButton";
+import WellnessCheck from "@/components/WellnessCheck";
+import ResourcesSection from "@/components/ResourcesSection";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 
 const Index = () => {
@@ -38,33 +40,6 @@ const Index = () => {
       description: "Customize your experience",
       path: "/settings",
       color: "from-gray-500 to-slate-500"
-    }
-  ];
-
-  const resources = [
-    {
-      icon: Heart,
-      title: "Self-Care Tips",
-      description: "Daily wellness practices",
-      color: "text-red-500"
-    },
-    {
-      icon: Shield,
-      title: "Safety Planning",
-      description: "Personal safety resources",
-      color: "text-blue-500"
-    },
-    {
-      icon: Phone,
-      title: "Crisis Support",
-      description: "24/7 helpline numbers",
-      color: "text-green-500"
-    },
-    {
-      icon: BookOpen,
-      title: "Educational Content",
-      description: "Learn about healing",
-      color: "text-purple-500"
     }
   ];
 
@@ -104,41 +79,10 @@ const Index = () => {
         </section>
 
         {/* Wellness Check */}
-        <Card className="mb-8 border-[#9E78E9]/20 bg-gradient-to-r from-[#D3E4FD]/30 to-white dark:from-gray-800 dark:to-gray-700">
-          <CardHeader>
-            <CardTitle className="text-lg text-[#9E78E9] flex items-center">
-              <Heart className="w-5 h-5 mr-2" />
-              How are you feeling today?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-2">
-              {['😊', '😐', '😔', '😢'].map((emoji, index) => (
-                <Button key={index} variant="outline" className="h-12 text-2xl hover:bg-[#9E78E9]/10" aria-label={`Feeling ${index + 1}`}>
-                  {emoji}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <WellnessCheck />
 
         {/* Resources */}
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Resources</h2>
-          <div className="space-y-3">
-            {resources.map((resource, index) => (
-              <Card key={index} className="border-[#9E78E9]/20 hover:border-[#9E78E9]/40 transition-colors cursor-pointer">
-                <CardContent className="p-4 flex items-center space-x-4">
-                  <resource.icon className={`w-6 h-6 ${resource.color}`} />
-                  <div>
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">{resource.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{resource.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        <ResourcesSection />
 
         {/* Daily Affirmation */}
         <Card className="mb-8 border-[#9E78E9]/20 bg-gradient-to-r from-[#9E78E9]/10 to-white dark:from-gray-800 dark:to-gray-700">
