@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { Type, Eye, Contrast, MotionOff } from "lucide-react";
+import { Type, Eye, Contrast, Zap } from "lucide-react";
 
 const AccessibilitySettings = () => {
   const {
@@ -113,7 +113,7 @@ const AccessibilitySettings = () => {
         <div className="flex items-center justify-between py-2">
           <div className="space-y-1">
             <Label htmlFor="reduced-motion" className="flex items-center text-base font-medium">
-              <MotionOff className="w-4 h-4 mr-2" />
+              <Zap className="w-4 h-4 mr-2" />
               Reduce Motion
             </Label>
             <p className="text-sm text-gray-600 dark:text-gray-300">

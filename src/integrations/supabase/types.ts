@@ -72,8 +72,10 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          edited_at: string | null
           id: string
           is_anonymous: boolean | null
+          is_edited: boolean | null
           likes_count: number | null
           replies_count: number | null
           title: string | null
@@ -83,8 +85,10 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_anonymous?: boolean | null
+          is_edited?: boolean | null
           likes_count?: number | null
           replies_count?: number | null
           title?: string | null
@@ -94,8 +98,10 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_anonymous?: boolean | null
+          is_edited?: boolean | null
           likes_count?: number | null
           replies_count?: number | null
           title?: string | null
