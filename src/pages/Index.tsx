@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Bot, Settings, Users, Heart } from "lucide-react";
+import { MessageSquare, Bot, Settings, Users, Heart, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SOSButton from "@/components/SOSButton";
@@ -9,10 +9,17 @@ import WellnessCheck from "@/components/WellnessCheck";
 import ResourcesSection from "@/components/ResourcesSection";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileAction from "@/components/ProfileAction";
+import { useTheme } from "@/components/ThemeProvider";
 
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   const quickActions = [
     {
@@ -48,18 +55,29 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20 pt-safe">
       <div className="container mx-auto px-4 py-6 max-w-md">
-        {/* Header */}
-        <header className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 overflow-hidden">
-            <img 
-              src="/lovable-uploads/28737141-f0a2-4128-9db2-1b925db984a1.png" 
-              alt="HopeCore Logo" 
-              className="w-full h-full object-contain"
-            />
+        {/* Header with Profile and Theme Toggle */}
+        <div className="flex items-center justify-between mb-8">
+          <ProfileAction size="sm" />
+          <div className="flex-1 text-center">
+            <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+              <img 
+                src="/lovable-uploads/28737141-f0a2-4128-9db2-1b925db984a1.png" 
+                alt="HopeCore Logo" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">{t('appName')}</h1>
+            <p className="text-gray-600 dark:text-gray-300">{t('tagline')}</p>
           </div>
-          <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">{t('appName')}</h1>
-          <p className="text-gray-600 dark:text-gray-300">{t('tagline')}</p>
-        </header>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+        </div>
 
         {/* SOS Button */}
         <div className="mb-8">

@@ -13,17 +13,15 @@ const ProfileHeader = () => {
 
   return (
     <div className="flex items-center justify-between mb-8">
-      <div className="scale-[2] origin-left">
-        <ProfileAction />
-      </div>
+      <ProfileAction size="sm" />
       <h1 className="text-3xl font-bold text-[#9E78E9] text-center flex-1">My Profile</h1>
       <Button
         variant="ghost"
         size="sm"
         onClick={toggleTheme}
-        className="w-10 h-10 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+        className="w-8 h-8 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
       >
-        {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </Button>
     </div>
   );

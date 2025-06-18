@@ -7,7 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { User, Settings, LogOut, LogIn, UserPlus, Crown } from 'lucide-react';
 
-const ProfileAction = () => {
+interface ProfileActionProps {
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const ProfileAction = ({ size = 'md' }: ProfileActionProps) => {
   const navigate = useNavigate();
   const { user, signOut, isGuest, switchToAccountMode } = useAuth();
   const { profile } = useProfile();
@@ -34,15 +38,23 @@ const ProfileAction = () => {
     return name.charAt(0).toUpperCase();
   };
 
+  const sizeClasses = {
+    sm: 'w-6 h-6',
+    md: 'w-8 h-8', 
+    lg: 'w-10 h-10'
+  };
+
+  const buttonSize = sizeClasses[size];
+
   // For guest users
   if (isGuest) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full p-0">
-            <Avatar className="w-10 h-10">
+          <Button variant="ghost" size="sm" className={`${buttonSize} rounded-full p-0`}>
+            <Avatar className={buttonSize}>
               <AvatarFallback className="bg-gray-200 text-gray-600">
-                <User className="w-5 h-5" />
+                <User className="w-4 h-4" />
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -75,10 +87,10 @@ const ProfileAction = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full p-0">
-            <Avatar className="w-10 h-10">
+          <Button variant="ghost" size="sm" className={`${buttonSize} rounded-full p-0`}>
+            <Avatar className={buttonSize}>
               <AvatarFallback className="bg-gray-200 text-gray-600">
-                <User className="w-5 h-5" />
+                <User className="w-4 h-4" />
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -101,8 +113,8 @@ const ProfileAction = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full p-0">
-          <Avatar className="w-10 h-10">
+        <Button variant="ghost" size="sm" className={`${buttonSize} rounded-full p-0`}>
+          <Avatar className={buttonSize}>
             {profile?.uses_avatar === false && profile?.profile_picture_url ? (
               <AvatarImage src={profile.profile_picture_url} alt={getDisplayName()} />
             ) : null}
