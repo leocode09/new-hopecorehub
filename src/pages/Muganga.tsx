@@ -10,8 +10,12 @@ const Muganga = () => {
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
-            <Heart className="w-8 h-8 text-white" />
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+            <img 
+              src="/lovable-uploads/28737141-f0a2-4128-9db2-1b925db984a1.png" 
+              alt="HopeCore Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold text-[#9E78E9]">Muganga Therapy</h1>
           <p className="text-gray-600 dark:text-gray-300">Professional mental health support</p>

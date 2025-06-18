@@ -32,16 +32,20 @@ const Index = () => {
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            className="w-12 h-12 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+            className="w-16 h-16 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
           >
-            {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            {theme === "dark" ? <Sun className="w-8 h-8" /> : <Moon className="w-8 h-8" />}
           </Button>
         </div>
 
         {/* Main Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto w-24 h-24 bg-[#9E78E9] rounded-full flex items-center justify-center mb-6 shadow-lg">
-            <Heart className="w-12 h-12 text-white" />
+          <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-lg overflow-hidden">
+            <img 
+              src="/lovable-uploads/28737141-f0a2-4128-9db2-1b925db984a1.png" 
+              alt="HopeCore Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">HopeCore Hub</h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
