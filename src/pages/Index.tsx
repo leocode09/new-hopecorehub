@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
+import ProfileAction from "@/components/ProfileAction";
 import SOSButton from "@/components/SOSButton";
 import { Heart, MessageCircle, Bot, Users, Shield, Phone } from "lucide-react";
 
@@ -15,7 +16,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-24">
       <div className="container mx-auto px-4 py-6 max-w-md">
-        {/* Header */}
+        {/* Header with Profile Action */}
+        <div className="flex items-start justify-between mb-6">
+          <ProfileAction />
+          <div className="flex-1"></div>
+        </div>
+
+        {/* Main Header */}
         <div className="text-center mb-8">
           <div className="mx-auto w-24 h-24 bg-[#9E78E9] rounded-full flex items-center justify-center mb-6 shadow-lg">
             <Heart className="w-12 h-12 text-white" />

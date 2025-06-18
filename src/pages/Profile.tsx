@@ -6,21 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import BottomNav from "@/components/BottomNav";
+import ProfileAction from "@/components/ProfileAction";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { User, Edit, LogOut, Shield } from "lucide-react";
+import { User, Edit, Shield, Camera } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
   
   const [formData, setFormData] = useState({
     full_name: '',
+    nickname: '',
     phone: '',
     location: '',
-    anonymous_by_default: true
+    anonymous_by_default: true,
+    uses_avatar: true
   });
 
   useEffect(() => {
@@ -34,9 +39,11 @@ const Profile = () => {
     if (profile) {
       setFormData({
         full_name: profile.full_name || '',
+        nickname: profile.nickname || '',
         phone: profile.phone || '',
         location: profile.location || '',
-        anonymous_by_default: profile.anonymous_by_default
+        anonymous_by_default: profile.anonymous_by_default,
+        uses_avatar: profile.uses_avatar
       });
     }
   }, [profile]);
@@ -45,9 +52,27 @@ const Profile = () => {
     await updateProfile(formData);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+  const handleProfilePictureUpload = async (url: string) => {
+    await updateProfile({ 
+      profile_picture_url: url,
+      uses_avatar: false 
+    });
+  };
+
+  const toggleAvatarUse = async (useAvatar: boolean) => {
+    setFormData(prev => ({ ...prev, uses_avatar: useAvatar }));
+    await updateProfile({ uses_avatar: useAvatar });
+  };
+
+  const getDisplayName = () => {
+    if (profile?.nickname) return profile.nickname;
+    if (profile?.full_name) return profile.full_name;
+    return 'Anonymous User';
+  };
+
+  const getAvatarFallback = () => {
+    const name = getDisplayName();
+    return name.charAt(0).toUpperCase();
   };
 
   if (loading) {
@@ -57,16 +82,53 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-md">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="mx-auto w-20 h-20 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
-            <User className="w-10 h-10 text-white" />
-          </div>
+        {/* Header with Profile Action */}
+        <div className="flex items-center justify-between mb-6">
+          <ProfileAction />
           <h1 className="text-2xl font-bold text-[#9E78E9]">Your Profile</h1>
-          <p className="text-gray-600 dark:text-gray-300">Manage your account safely</p>
+          <div></div>
         </div>
 
-        {/* Profile Form */}
+        {/* Profile Picture Section */}
+        <Card className="mb-6 border-[#9E78E9]/20">
+          <CardHeader>
+            <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+              <Camera className="w-5 h-5 mr-2" />
+              Profile Picture
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="w-24 h-24">
+                {!formData.uses_avatar && profile?.profile_picture_url ? (
+                  <AvatarImage src={profile.profile_picture_url} alt={getDisplayName()} />
+                ) : null}
+                <AvatarFallback className="bg-[#9E78E9] text-white text-2xl">
+                  {getAvatarFallback()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={formData.uses_avatar}
+                    onCheckedChange={toggleAvatarUse}
+                  />
+                  <Label>Use Avatar</Label>
+                </div>
+              </div>
+              
+              {!formData.uses_avatar && (
+                <ProfilePictureUpload 
+                  onUploadComplete={handleProfilePictureUpload}
+                  currentImageUrl={profile?.profile_picture_url || undefined}
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Personal Information */}
         <Card className="mb-6 border-[#9E78E9]/20">
           <CardHeader>
             <CardTitle className="text-lg text-[#9E78E9] flex items-center">
@@ -76,18 +138,29 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="full_name">Full Name (Optional)</Label>
               <Input
-                id="name"
+                id="full_name"
                 type="text"
-                placeholder="Your name (optional)"
+                placeholder="Your full legal name"
                 value={formData.full_name}
                 onChange={(e) => setFormData({...formData, full_name: e.target.value})}
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname (Optional)</Label>
+              <Input
+                id="nickname"
+                type="text"
+                placeholder="What you'd like to be called"
+                value={formData.nickname}
+                onChange={(e) => setFormData({...formData, nickname: e.target.value})}
+              />
+            </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -98,14 +171,17 @@ const Profile = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="location">Location (Optional)</Label>
+              <Label htmlFor="location">Location/Address (Optional)</Label>
               <Input
                 id="location"
                 type="text"
-                placeholder="Your location for local resources"
+                placeholder="For emergency contact purposes"
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
               />
+              <p className="text-xs text-gray-500">
+                Used by authorities for emergency assistance only
+              </p>
             </div>
             
             <Button onClick={handleSave} className="w-full bg-[#9E78E9] hover:bg-[#8B69D6]">
@@ -135,25 +211,6 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Account Actions */}
-        <div className="space-y-3">
-          <Button 
-            variant="outline" 
-            className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#D3E4FD]/30"
-          >
-            Change Password
-          </Button>
-          
-          <Button 
-            onClick={handleSignOut}
-            variant="outline" 
-            className="w-full border-red-300 text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
 
         {/* User Info */}
         <Card className="mt-6 border-[#9E78E9]/20">

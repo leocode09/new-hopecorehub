@@ -160,8 +160,11 @@ export type Database = {
           full_name: string | null
           id: string
           location: string | null
+          nickname: string | null
           phone: string | null
+          profile_picture_url: string | null
           updated_at: string
+          uses_avatar: boolean | null
         }
         Insert: {
           anonymous_by_default?: boolean | null
@@ -170,8 +173,11 @@ export type Database = {
           full_name?: string | null
           id: string
           location?: string | null
+          nickname?: string | null
           phone?: string | null
+          profile_picture_url?: string | null
           updated_at?: string
+          uses_avatar?: boolean | null
         }
         Update: {
           anonymous_by_default?: boolean | null
@@ -180,8 +186,11 @@ export type Database = {
           full_name?: string | null
           id?: string
           location?: string | null
+          nickname?: string | null
           phone?: string | null
+          profile_picture_url?: string | null
           updated_at?: string
+          uses_avatar?: boolean | null
         }
         Relationships: []
       }

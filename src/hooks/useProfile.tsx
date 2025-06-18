@@ -7,9 +7,12 @@ import { useToast } from '@/hooks/use-toast';
 interface Profile {
   id: string;
   full_name: string | null;
+  nickname: string | null;
   phone: string | null;
   location: string | null;
   avatar_url: string | null;
+  profile_picture_url: string | null;
+  uses_avatar: boolean;
   anonymous_by_default: boolean;
 }
 
