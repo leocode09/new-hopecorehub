@@ -172,7 +172,8 @@ const Muganga = () => {
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                     <p className="text-xs text-blue-700 dark:text-blue-300 text-center">
                       <strong>Note:</strong> Payment goes directly to our team at +250780332779. 
-                      You'll be contacted within minutes for account activation.
+                      The number is registered to <strong>Aline IRADUKUNDA</strong>, our Chief Operations Officer.
+                      She will be contacting you as soon as the payment is received for account activation.
                     </p>
                   </div>
 

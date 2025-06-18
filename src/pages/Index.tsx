@@ -55,9 +55,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20 pt-safe">
       <div className="container mx-auto px-4 py-6 max-w-md">
-        {/* Header with Profile and Theme Toggle */}
-        <div className="flex items-center justify-between mb-8">
-          <ProfileAction size="sm" />
+        {/* Header with Profile and Theme Toggle in corners */}
+        <div className="flex items-start justify-between mb-8 relative">
+          <div className="absolute top-0 left-0">
+            <ProfileAction size="sm" />
+          </div>
           <div className="flex-1 text-center">
             <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 overflow-hidden">
               <img 
@@ -69,14 +71,16 @@ const Index = () => {
             <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">{t('appName')}</h1>
             <p className="text-gray-600 dark:text-gray-300">{t('tagline')}</p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </Button>
+          <div className="absolute top-0 right-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-full p-0 text-[#9E78E9] hover:bg-[#9E78E9]/10"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
 
         {/* SOS Button */}
