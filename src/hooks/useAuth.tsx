@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,9 +7,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isGuest: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  switchToAccountMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,10 +20,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
+
+    // Check for guest mode
+    const guestMode = localStorage.getItem("hopecore-guest-mode");
+    if (guestMode === "true") {
+      setIsGuest(true);
+      setLoading(false);
+      return;
+    }
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -33,6 +43,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        setIsGuest(false);
+
+        // Clear guest mode when user signs in
+        if (session?.user) {
+          localStorage.removeItem("hopecore-guest-mode");
+        }
 
         // Handle specific auth events
         if (event === 'SIGNED_IN' && session?.user) {
@@ -45,8 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             title: "Signed out",
             description: "You've been successfully signed out.",
           });
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
         }
       }
     );
@@ -62,6 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
+          setIsGuest(false);
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
@@ -193,14 +208,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const switchToAccountMode = () => {
+    localStorage.removeItem("hopecore-guest-mode");
+    setIsGuest(false);
+    // Don't redirect automatically - let user choose next action
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
       session,
       loading,
+      isGuest,
       signUp,
       signIn,
-      signOut
+      signOut,
+      switchToAccountMode
     }}>
       {children}
     </AuthContext.Provider>

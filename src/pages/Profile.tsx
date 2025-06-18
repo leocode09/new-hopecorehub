@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, UserPlus, Crown } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfilePictureSection from "@/components/profile/ProfilePictureSection";
@@ -14,7 +14,7 @@ import { useProfile } from "@/hooks/useProfile";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const { profile, loading, updateProfile } = useProfile();
   const [saving, setSaving] = useState(false);
   
@@ -28,12 +28,69 @@ const Profile = () => {
     uses_avatar: true
   });
 
+  // Show guest upgrade prompt if user is in guest mode
+  if (isGuest) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white pb-20">
+        <div className="container mx-auto px-4 py-6 max-w-md">
+          <ProfileHeader />
+
+          <Card className="bg-gradient-to-r from-[#9E78E9] to-[#8B69D6] border-none text-white mb-6">
+            <CardHeader className="text-center">
+              <Crown className="w-12 h-12 mx-auto mb-4" />
+              <CardTitle className="text-xl">Unlock Your Profile</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-sm opacity-90">
+                Create an account to personalize your profile, save your preferences, and unlock the full HopeCore experience.
+              </p>
+              
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="w-full bg-white text-[#9E78E9] hover:bg-gray-100"
+                  size="lg"
+                >
+                  <UserPlus className="w-5 h-5 mr-2" />
+                  Create Your Account
+                </Button>
+                
+                <Button 
+                  onClick={() => navigate('/')}
+                  variant="ghost"
+                  className="w-full text-white hover:bg-white/10"
+                >
+                  Continue as Guest
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-white mb-3">What you'll get:</h3>
+              <ul className="space-y-2 text-sm text-gray-300">
+                <li>• Personalized profile and avatar</li>
+                <li>• Save your forum posts and replies</li>
+                <li>• Access to Muganga Therapy</li>
+                <li>• Sync preferences across devices</li>
+                <li>• Enhanced privacy controls</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <BottomNav />
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (!user) {
+    if (!user && !isGuest) {
       navigate('/auth');
       return;
     }
-  }, [user, navigate]);
+  }, [user, isGuest, navigate]);
 
   useEffect(() => {
     if (profile) {
