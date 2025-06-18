@@ -30,14 +30,16 @@ const SOSButton = () => {
 
   return (
     <>
-      <Button
-        onClick={handleSOSClick}
-        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 text-lg"
-        size="lg"
-      >
-        <Phone className="w-6 h-6 mr-3" />
-        SOS - Emergency Help
-      </Button>
+      <div className="flex justify-center">
+        <Button
+          onClick={handleSOSClick}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 text-base max-w-xs"
+          size="lg"
+        >
+          <Phone className="w-5 h-5 mr-2" />
+          SOS - Emergency Help
+        </Button>
+      </div>
 
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md">

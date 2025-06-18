@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
+import SOSButton from "@/components/SOSButton";
 import { Heart, MessageCircle, Bot, Users, Shield, Phone } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isGuest = localStorage.getItem("hopecore-guest-mode") === "true";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-24">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -33,6 +35,21 @@ const Index = () => {
               </p>
             </CardContent>
           </Card>
+        ) : isGuest ? (
+          <Card className="mb-6 border-[#9E78E9]/20 bg-[#D3E4FD]/20">
+            <CardContent className="p-4">
+              <p className="text-center text-gray-700 dark:text-gray-300">
+                💜 Welcome! You're using guest mode. Create an account to access all features.
+              </p>
+              <Button 
+                onClick={() => navigate('/welcome')}
+                className="w-full mt-3 bg-[#9E78E9] hover:bg-[#8B69D6]"
+                size="sm"
+              >
+                Create Account
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <Card className="mb-6 border-[#9E78E9]/20">
             <CardContent className="p-4 text-center">
@@ -40,14 +57,19 @@ const Index = () => {
                 Join our supportive community and start your healing journey.
               </p>
               <Button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/welcome')}
                 className="bg-[#9E78E9] hover:bg-[#8B69D6]"
               >
-                Sign In / Sign Up
+                Get Started
               </Button>
             </CardContent>
           </Card>
         )}
+
+        {/* SOS Button */}
+        <div className="mb-6">
+          <SOSButton />
+        </div>
 
         {/* Main Features */}
         <div className="space-y-4">
@@ -98,18 +120,20 @@ const Index = () => {
               <CardTitle className="text-lg text-[#9E78E9] flex items-center">
                 <Users className="w-6 h-6 mr-3" />
                 Muganga Platform
+                {!user && !isGuest && <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Premium</span>}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Connect with professional counselors and mental health resources in Rwanda.
+                {!user && !isGuest && " (Account required)"}
               </p>
               <Button 
                 onClick={() => navigate('/muganga')}
                 variant="outline" 
                 className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#D3E4FD]/30"
               >
-                Find Support
+                {user || isGuest ? "Find Support" : "Create Account to Access"}
               </Button>
             </CardContent>
           </Card>
