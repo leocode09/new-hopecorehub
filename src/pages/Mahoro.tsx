@@ -3,43 +3,36 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BottomNav from "@/components/BottomNav";
-import { Bot, Send, Mic, Volume2, Globe } from "lucide-react";
+import { useMahoroChat } from "@/hooks/useMahoroChat";
+import { Bot, Send, Mic, Volume2, Globe, Loader2 } from "lucide-react";
 
 const Mahoro = () => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Muraho! I'm Mahoro, your supportive AI companion. How can I help you today? You can speak to me in Kinyarwanda, English, Swahili, or French.",
-      isBot: true,
-      timestamp: new Date().toLocaleTimeString()
-    }
-  ]);
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const { messages, isLoading, sendMessage } = useMahoroChat();
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
+  const languages = [
+    { value: "en", label: "English" },
+    { value: "rw", label: "Kinyarwanda" },
+    { value: "fr", label: "Français" },
+    { value: "sw", label: "Kiswahili" }
+  ];
 
-    const newMessage = {
-      id: messages.length + 1,
-      text: message,
-      isBot: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
-
-    setMessages([...messages, newMessage]);
+  const handleSendMessage = async () => {
+    if (!message.trim() || isLoading) return;
+    
+    const messageToSend = message;
     setMessage("");
+    await sendMessage(messageToSend, selectedLanguage);
+  };
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: "I hear you, and I want you to know that your feelings are valid. You're taking a brave step by reaching out. Remember, healing is not linear, and it's okay to take things one day at a time. Would you like me to share some grounding techniques that might help?",
-        isBot: true,
-        timestamp: new Date().toLocaleTimeString()
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
@@ -57,9 +50,18 @@ const Mahoro = () => {
             </div>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
-              <Globe className="w-4 h-4" />
-            </Button>
+            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+              <SelectTrigger className="w-24 h-8">
+                <Globe className="w-4 h-4" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="outline" size="sm">
               <Volume2 className="w-4 h-4" />
             </Button>
@@ -80,13 +82,24 @@ const Mahoro = () => {
                     : 'bg-[#9E78E9] text-white'
                 }`}
               >
-                <p className="text-sm">{msg.text}</p>
+                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                 <p className={`text-xs mt-1 ${msg.isBot ? 'text-gray-500' : 'text-purple-100'}`}>
                   {msg.timestamp}
                 </p>
               </div>
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg max-w-xs">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Mahoro is thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Area */}
@@ -97,22 +110,28 @@ const Mahoro = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type your message..."
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyPress={handleKeyPress}
                 className="flex-1"
+                disabled={isLoading}
               />
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" disabled={isLoading}>
                 <Mic className="w-4 h-4" />
               </Button>
               <Button 
                 onClick={handleSendMessage}
                 className="bg-[#9E78E9] hover:bg-[#8B69D6]"
                 size="sm"
+                disabled={isLoading || !message.trim()}
               >
-                <Send className="w-4 h-4" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              💜 Full AI features will be activated when we connect Supabase
+              💜 AI-powered support in multiple languages - Crisis support: 3029 (Isange) | 3512 (Police)
             </p>
           </CardContent>
         </Card>
