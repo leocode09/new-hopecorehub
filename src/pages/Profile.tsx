@@ -1,12 +1,59 @@
 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { User, Edit, LogOut, Shield } from "lucide-react";
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { profile, loading, updateProfile } = useProfile();
+  
+  const [formData, setFormData] = useState({
+    full_name: '',
+    phone: '',
+    location: '',
+    anonymous_by_default: true
+  });
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || '',
+        phone: profile.phone || '',
+        location: profile.location || '',
+        anonymous_by_default: profile.anonymous_by_default
+      });
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    await updateProfile(formData);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-md">
@@ -34,7 +81,8 @@ const Profile = () => {
                 id="name"
                 type="text"
                 placeholder="Your name (optional)"
-                defaultValue="Anonymous User"
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
               />
             </div>
             
@@ -44,6 +92,8 @@ const Profile = () => {
                 id="phone"
                 type="tel"
                 placeholder="+250 XXX XXX XXX"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
               />
             </div>
             
@@ -53,10 +103,12 @@ const Profile = () => {
                 id="location"
                 type="text"
                 placeholder="Your location for local resources"
+                value={formData.location}
+                onChange={(e) => setFormData({...formData, location: e.target.value})}
               />
             </div>
             
-            <Button className="w-full bg-[#9E78E9] hover:bg-[#8B69D6]">
+            <Button onClick={handleSave} className="w-full bg-[#9E78E9] hover:bg-[#8B69D6]">
               Save Changes
             </Button>
           </CardContent>
@@ -76,19 +128,10 @@ const Profile = () => {
                 <p className="font-medium text-gray-900 dark:text-gray-100">Anonymous Forum Posts</p>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Post anonymously by default</p>
               </div>
-              <Button variant="outline" size="sm">
-                Enabled
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Profile Visibility</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Who can see your profile</p>
-              </div>
-              <Button variant="outline" size="sm">
-                Private
-              </Button>
+              <Switch
+                checked={formData.anonymous_by_default}
+                onCheckedChange={(checked) => setFormData({...formData, anonymous_by_default: checked})}
+              />
             </div>
           </CardContent>
         </Card>
@@ -103,6 +146,7 @@ const Profile = () => {
           </Button>
           
           <Button 
+            onClick={handleSignOut}
             variant="outline" 
             className="w-full border-red-300 text-red-600 hover:bg-red-50"
           >
@@ -111,11 +155,11 @@ const Profile = () => {
           </Button>
         </div>
 
-        {/* Guest Notice */}
+        {/* User Info */}
         <Card className="mt-6 border-[#9E78E9]/20">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              💜 You're currently browsing as a guest. Sign up to save your preferences and access all features.
+              💜 Signed in as: {user?.email}
             </p>
           </CardContent>
         </Card>

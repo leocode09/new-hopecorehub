@@ -1,118 +1,155 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
-import SOSButton from "@/components/SOSButton";
-import { MessageCircle, Bot, Heart, Users, Shield, Phone } from "lucide-react";
+import { Heart, MessageCircle, Bot, Users, Shield, Phone } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: MessageCircle,
-      title: "Survivors' Forum",
-      description: "Connect anonymously with others who understand",
-      path: "/forum",
-      color: "bg-blue-50 dark:bg-blue-950"
-    },
-    {
-      icon: Bot,
-      title: "Mahoro AI",
-      description: "24/7 supportive AI companion in your language",
-      path: "/mahoro",
-      color: "bg-purple-50 dark:bg-purple-950"
-    },
-    {
-      icon: Heart,
-      title: "Muganga Therapy",
-      description: "Professional counseling sessions",
-      path: "/muganga",
-      color: "bg-pink-50 dark:bg-pink-950"
-    }
-  ];
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="mx-auto w-24 h-24 bg-[#9E78E9] rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <Heart className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-[#9E78E9] mb-2">HopeCore Hub</h1>
-          <p className="text-gray-600 dark:text-gray-300 italic">
-            "Healing Begins When The Silence Ends"
+          <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">HopeCore Hub</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
+            Your safe space for healing and support
           </p>
         </div>
 
-        {/* SOS Button */}
-        <div className="mb-6">
-          <SOSButton />
+        {/* Welcome Message */}
+        {user ? (
+          <Card className="mb-6 border-[#9E78E9]/20 bg-[#D3E4FD]/20">
+            <CardContent className="p-4">
+              <p className="text-center text-gray-700 dark:text-gray-300">
+                💜 Welcome back! We're here to support your healing journey.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-6 border-[#9E78E9]/20">
+            <CardContent className="p-4 text-center">
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Join our supportive community and start your healing journey.
+              </p>
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="bg-[#9E78E9] hover:bg-[#8B69D6]"
+              >
+                Sign In / Sign Up
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Main Features */}
+        <div className="space-y-4">
+          <Card className="border-[#9E78E9]/20 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+                <MessageCircle className="w-6 h-6 mr-3" />
+                Survivors' Forum
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Connect with others who understand your journey. Share experiences and find support in a safe, moderated space.
+              </p>
+              <Button 
+                onClick={() => navigate('/forum')}
+                variant="outline" 
+                className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#D3E4FD]/30"
+              >
+                Visit Forum
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[#9E78E9]/20 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+                <Bot className="w-6 h-6 mr-3" />
+                Mahoro AI Companion
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Chat with Mahoro, your AI companion trained to provide emotional support and guidance in multiple languages.
+              </p>
+              <Button 
+                onClick={() => navigate('/mahoro')}
+                variant="outline" 
+                className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#D3E4FD]/30"
+              >
+                Chat with Mahoro
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[#9E78E9]/20 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+                <Users className="w-6 h-6 mr-3" />
+                Muganga Platform
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Connect with professional counselors and mental health resources in Rwanda.
+              </p>
+              <Button 
+                onClick={() => navigate('/muganga')}
+                variant="outline" 
+                className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#D3E4FD]/30"
+              >
+                Find Support
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Welcome Message */}
-        <Card className="mb-6 border-[#9E78E9]/20">
-          <CardContent className="p-4 text-center">
-            <p className="text-gray-700 dark:text-gray-300">
-              Welcome to your safe space. You are not alone on this journey. 
-              Take your time and access the support you need.
+        {/* Emergency Section */}
+        <Card className="mt-6 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg text-red-600 dark:text-red-400 flex items-center">
+              <Phone className="w-6 h-6 mr-3" />
+              Emergency Contacts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Isange One Stop Center:</strong> 3029
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Rwanda National Police:</strong> 3512
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Crisis Support:</strong> Available 24/7
             </p>
           </CardContent>
         </Card>
 
-        {/* Feature Cards */}
-        <div className="space-y-4">
-          {features.map((feature) => (
-            <Card 
-              key={feature.path} 
-              className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-[#9E78E9]/20"
-              onClick={() => navigate(feature.path)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${feature.color}`}>
-                    <feature.icon className="w-6 h-6 text-[#9E78E9]" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-[#9E78E9]">
-                      {feature.title}
-                    </CardTitle>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <CardDescription className="text-gray-600 dark:text-gray-300">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Quick Access */}
-        <div className="mt-8 space-y-3">
-          <h3 className="text-lg font-semibold text-[#9E78E9] text-center">Quick Access</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline"
-              onClick={() => navigate("/profile")}
-              className="border-[#9E78E9]/30 text-[#9E78E9] hover:bg-[#D3E4FD]/30"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => window.open("tel:3029", "_self")}
-              className="border-[#9E78E9]/30 text-[#9E78E9] hover:bg-[#D3E4FD]/30"
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Isange
-            </Button>
-          </div>
-        </div>
+        {/* Privacy Notice */}
+        <Card className="mt-6 border-[#9E78E9]/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <Shield className="w-5 h-5 text-[#9E78E9] mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Your privacy is protected:</strong> All communications are encrypted and 
+                  forum posts are anonymous by default. You control what you share.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <BottomNav />
