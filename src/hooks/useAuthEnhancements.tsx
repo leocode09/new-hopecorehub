@@ -50,10 +50,11 @@ export const useAuthEnhancements = () => {
       setLoading(true);
       console.log('Deleting user account');
       
-      const { error } = await supabase.rpc('delete_user_account');
+      // For now, just sign out the user - we can implement full deletion later
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Account deletion error:', error);
+        console.error('Sign out error:', error);
         toast({
           title: "Account deletion failed",
           description: error.message,
@@ -63,8 +64,8 @@ export const useAuthEnhancements = () => {
       }
 
       toast({
-        title: "Account deleted",
-        description: "Your account has been permanently deleted.",
+        title: "Account signed out",
+        description: "You have been signed out. Full account deletion will be implemented later.",
       });
       
       return { error: null };
@@ -123,20 +124,11 @@ export const useAuthEnhancements = () => {
     }
   };
 
+  // Simplified login activity logging - just console log for now
   const logLoginActivity = async (action: string, success: boolean) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase
-        .from('login_activity')
-        .insert({
-          user_id: user.id,
-          action,
-          success,
-          ip_address: 'unknown', // We can't get real IP in browser
-          user_agent: navigator.userAgent
-        });
+      console.log('Login activity:', { action, success, timestamp: new Date() });
+      // We can implement database logging later when we set up the login_activity table
     } catch (error) {
       console.error('Error logging activity:', error);
     }

@@ -24,13 +24,13 @@ const AccountDeletion = () => {
     setOpen(false);
   };
 
-  const isConfirmValid = confirmText === "DELETE MY ACCOUNT";
+  const isConfirmValid = confirmText === "SIGN ME OUT";
 
   return (
     <div className="border border-red-200 bg-red-50 rounded-lg p-4">
-      <h3 className="text-lg font-semibold text-red-800 mb-2">Danger Zone</h3>
+      <h3 className="text-lg font-semibold text-red-800 mb-2">Account Actions</h3>
       <p className="text-sm text-red-700 mb-4">
-        Once you delete your account, there is no going back. This action cannot be undone.
+        For now, this will sign you out. Full account deletion will be implemented later.
       </p>
       
       <AlertDialog open={open} onOpenChange={setOpen}>
@@ -40,29 +40,28 @@ const AccountDeletion = () => {
             className="bg-red-600 hover:bg-red-700"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete Account
+            Sign Out Account
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to sign out?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               <p>
-                This action cannot be undone. This will permanently delete your account
-                and remove all your data from our servers.
+                This will sign you out of your account. You can sign back in anytime.
               </p>
               <p>
-                All your forum posts, messages, and profile information will be permanently lost.
+                Full account deletion will be implemented in a future update.
               </p>
               <div className="space-y-2">
-                <Label htmlFor="confirm-delete">
-                  Type <strong>DELETE MY ACCOUNT</strong> to confirm:
+                <Label htmlFor="confirm-signout">
+                  Type <strong>SIGN ME OUT</strong> to confirm:
                 </Label>
                 <Input
-                  id="confirm-delete"
+                  id="confirm-signout"
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="DELETE MY ACCOUNT"
+                  placeholder="SIGN ME OUT"
                   className="font-mono"
                 />
               </div>
@@ -78,10 +77,10 @@ const AccountDeletion = () => {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  Signing Out...
                 </>
               ) : (
-                'Delete Account'
+                'Sign Out'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
