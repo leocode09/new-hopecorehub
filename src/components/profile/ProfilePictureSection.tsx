@@ -67,7 +67,10 @@ const ProfilePictureSection = ({
         <h2 className="text-xl font-semibold text-white mb-2">{getDisplayName()}</h2>
         
         <div className="space-y-3">
-          <ProfilePictureUpload onUpload={handleProfilePictureUpload} disabled={uploading} />
+          <ProfilePictureUpload 
+            onUploadComplete={handleProfilePictureUpload} 
+            currentImageUrl={profile?.profile_picture_url}
+          />
           
           <div className="flex justify-center space-x-2">
             <Button
