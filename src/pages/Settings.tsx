@@ -1,9 +1,11 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import BottomNav from "@/components/BottomNav";
 import AccessibilitySettings from "@/components/accessibility/AccessibilitySettings";
+import ProfileHeader from "@/components/profile/ProfileHeader";
 import { useTheme } from "@/components/ThemeProvider";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { Settings as SettingsIcon, Moon, Sun, Globe, Volume2, Bell, Shield, Wifi, WifiOff, Smartphone } from "lucide-react";
@@ -31,14 +33,16 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-md">
-        {/* Header */}
-        <header className="text-center mb-6">
+        {/* Header with Profile and Theme Toggle */}
+        <ProfileHeader />
+
+        {/* Settings Title */}
+        <div className="text-center mb-6">
           <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
             <SettingsIcon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-[#9E78E9]">{t('settings')}</h1>
           <p className="text-gray-600 dark:text-gray-300">Customize your experience</p>
-        </header>
+        </div>
 
         {/* Accessibility Settings */}
         <div className="mb-6">
