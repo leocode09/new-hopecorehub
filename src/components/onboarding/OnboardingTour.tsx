@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X, ArrowRight, ArrowLeft, Globe } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TourStep {
   id: string;
@@ -11,46 +13,55 @@ interface TourStep {
   content: string;
   targetSelector?: string;
   position: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  isLanguageSelection?: boolean;
 }
 
-const tourSteps: TourStep[] = [
-  {
-    id: 'welcome',
-    title: 'Welcome to HopeCore Hub! 💜',
-    content: 'Let us show you around this safe space designed for survivors and their healing journey.',
-    position: 'center'
-  },
-  {
-    id: 'forum',
-    title: 'Community Forum',
-    content: 'Share your thoughts and connect with others in our anonymous, supportive community space.',
-    position: 'center'
-  },
-  {
-    id: 'post-creation',
-    title: 'Create Posts',
-    content: 'Share your experiences anonymously. Your privacy and safety are our top priority.',
-    targetSelector: '.post-creation-form',
-    position: 'bottom'
-  },
-  {
-    id: 'mahoro',
-    title: 'Meet Mahoro',
-    content: 'Chat with our AI companion Mahoro for 24/7 support and guidance.',
-    position: 'center'
-  },
-  {
-    id: 'settings',
-    title: 'Customize Your Experience',
-    content: 'Adjust settings like low-data mode and accessibility features in the Settings page.',
-    position: 'center'
-  }
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'rw', name: 'Kinyarwanda', flag: '🇷🇼' },
+  { code: 'sw', name: 'Kiswahili', flag: '🇹🇿' }
 ];
 
 export const OnboardingTour = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const { preferences, updatePreferences } = useUserPreferences();
+  const { language, setLanguage, t } = useLanguage();
+
+  const tourSteps: TourStep[] = [
+    {
+      id: 'language',
+      title: t('chooseLanguage'),
+      content: t('choosePreferredLanguage'),
+      position: 'center',
+      isLanguageSelection: true
+    },
+    {
+      id: 'welcome',
+      title: t('onboardingWelcome'),
+      content: t('onboardingDescription'),
+      position: 'center'
+    },
+    {
+      id: 'forum',
+      title: t('forum'),
+      content: t('onboardingForum'),
+      position: 'center'
+    },
+    {
+      id: 'mahoro',
+      title: t('mahoro'),
+      content: t('onboardingMahoro'),
+      position: 'center'
+    },
+    {
+      id: 'settings',
+      title: t('settings'),
+      content: t('onboardingSettings'),
+      position: 'center'
+    }
+  ];
 
   useEffect(() => {
     if (preferences && !preferences.onboarding_completed) {
@@ -92,7 +103,7 @@ export const OnboardingTour = () => {
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="text-sm text-gray-500">
-              Step {currentStep + 1} of {tourSteps.length}
+              {t('skip')} {currentStep + 1} {t('of')} {tourSteps.length}
             </div>
             <Button
               variant="ghost"
@@ -105,12 +116,33 @@ export const OnboardingTour = () => {
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-[#9E78E9] mb-2">
+            <h3 className="text-lg font-semibold text-[#9E78E9] mb-2 flex items-center">
+              {currentTourStep.isLanguageSelection && <Globe className="w-5 h-5 mr-2" />}
               {currentTourStep.title}
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               {currentTourStep.content}
             </p>
+
+            {currentTourStep.isLanguageSelection && (
+              <div className="space-y-4">
+                <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        <div className="flex items-center space-x-2">
+                          <span>{lang.flag}</span>
+                          <span>{lang.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-between items-center">
@@ -121,7 +153,7 @@ export const OnboardingTour = () => {
               className="flex items-center"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Previous
+              {t('previous')}
             </Button>
 
             <div className="flex space-x-1">
@@ -140,10 +172,10 @@ export const OnboardingTour = () => {
               className="bg-[#9E78E9] hover:bg-[#8B69D6] flex items-center"
             >
               {currentStep === tourSteps.length - 1 ? (
-                'Get Started'
+                t('getStarted')
               ) : (
                 <>
-                  Next
+                  {t('next')}
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}

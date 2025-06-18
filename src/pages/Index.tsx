@@ -8,35 +8,37 @@ import SOSButton from "@/components/SOSButton";
 import WellnessCheck from "@/components/WellnessCheck";
 import ResourcesSection from "@/components/ResourcesSection";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const quickActions = [
     {
       icon: MessageSquare,
-      title: "Forum",
+      title: t('forum'),
       description: "Connect with community",
       path: "/forum",
       color: "from-purple-500 to-pink-500"
     },
     {
       icon: Bot,
-      title: "Mahoro",
+      title: t('mahoro'),
       description: "AI Support Companion",
       path: "/mahoro",
       color: "from-blue-500 to-cyan-500"
     },
     {
       icon: Users,
-      title: "Muganga",
+      title: t('muganga'),
       description: "Professional Support",
       path: "/muganga",
       color: "from-green-500 to-emerald-500"
     },
     {
       icon: Settings,
-      title: "Settings",
+      title: t('settings'),
       description: "Customize your experience",
       path: "/settings",
       color: "from-gray-500 to-slate-500"
@@ -51,8 +53,8 @@ const Index = () => {
           <div className="mx-auto w-20 h-20 bg-gradient-to-br from-[#9E78E9] to-[#8B69D6] rounded-full flex items-center justify-center mb-4">
             <Heart className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">HopeCore Hub</h1>
-          <p className="text-gray-600 dark:text-gray-300">Your safe space for healing and support</p>
+          <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">{t('appName')}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{t('tagline')}</p>
         </header>
 
         {/* SOS Button */}
@@ -99,9 +101,9 @@ const Index = () => {
           <CardContent className="p-4 text-center">
             <p className="text-red-700 dark:text-red-300 text-sm font-medium mb-2">In case of emergency:</p>
             <div className="space-y-1 text-xs text-red-600 dark:text-red-400">
-              <p><strong>Isange One Stop Center:</strong> 3029</p>
-              <p><strong>Rwanda National Police:</strong> 3512</p>
-              <p><strong>HopeCore Team:</strong> +250780332779</p>
+              <p><strong>{t('isangeCenter')}:</strong> 3029</p>
+              <p><strong>{t('nationalPolice')}:</strong> 3512</p>
+              <p><strong>{t('hopecoreTeam')}:</strong> +250780332779</p>
             </div>
           </CardContent>
         </Card>

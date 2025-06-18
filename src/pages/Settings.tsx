@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -8,10 +7,20 @@ import AccessibilitySettings from "@/components/accessibility/AccessibilitySetti
 import { useTheme } from "@/components/ThemeProvider";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { Settings as SettingsIcon, Moon, Sun, Globe, Volume2, Bell, Shield, Wifi, WifiOff, Smartphone } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { preferences, updatePreferences, loading } = useUserPreferences();
+  const { language, setLanguage, t } = useLanguage();
+
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'rw', name: 'Kinyarwanda', flag: '🇷🇼' },
+    { code: 'sw', name: 'Kiswahili', flag: '🇹🇿' }
+  ];
 
   const handlePreferenceChange = async (key: keyof typeof preferences, value: boolean) => {
     if (preferences) {
@@ -27,7 +36,7 @@ const Settings = () => {
           <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
             <SettingsIcon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-[#9E78E9]">Settings</h1>
+          <h1 className="text-2xl font-bold text-[#9E78E9]">{t('settings')}</h1>
           <p className="text-gray-600 dark:text-gray-300">Customize your experience</p>
         </header>
 
@@ -35,6 +44,52 @@ const Settings = () => {
         <div className="mb-6">
           <AccessibilitySettings />
         </div>
+
+        {/* Language & Audio */}
+        <Card className="mb-6 border-[#9E78E9]/20">
+          <CardHeader>
+            <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+              <Globe className="w-5 h-5 mr-2" />
+              Language & Audio
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="app-language">{t('appLanguage')}</Label>
+              <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+                <SelectTrigger id="app-language" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      <div className="flex items-center space-x-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                {t('choosePreferredLanguage')}
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Volume2 className="w-4 h-4 text-[#9E78E9]" />
+                <Label>Text-to-Speech</Label>
+              </div>
+              <Switch />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label>Voice-to-Text</Label>
+              <Switch />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Data & Performance */}
         <Card className="mb-6 border-[#9E78E9]/20">
@@ -106,40 +161,6 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Language & Audio */}
-        <Card className="mb-6 border-[#9E78E9]/20">
-          <CardHeader>
-            <CardTitle className="text-lg text-[#9E78E9] flex items-center">
-              <Globe className="w-5 h-5 mr-2" />
-              Language & Audio
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>App Language</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Choose your preferred language</p>
-              </div>
-              <Button variant="outline" size="sm">
-                English
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Volume2 className="w-4 h-4 text-[#9E78E9]" />
-                <Label>Text-to-Speech</Label>
-              </div>
-              <Switch />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <Label>Voice-to-Text</Label>
-              <Switch />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Notifications */}
         <Card className="mb-6 border-[#9E78E9]/20">
           <CardHeader>
@@ -201,17 +222,17 @@ const Settings = () => {
         {/* Emergency Contacts */}
         <Card className="mb-6 border-[#9E78E9]/20 bg-red-50 dark:bg-red-950">
           <CardHeader>
-            <CardTitle className="text-lg text-red-600 dark:text-red-400">Emergency Contacts</CardTitle>
+            <CardTitle className="text-lg text-red-600 dark:text-red-400">{t('emergencyContacts')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Isange One Stop Center:</strong> 3029
+              <strong>{t('isangeCenter')}:</strong> 3029
             </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Rwanda National Police:</strong> 3512
+              <strong>{t('nationalPolice')}:</strong> 3512
             </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>HopeCore Team:</strong> +250780332779
+              <strong>{t('hopecoreTeam')}:</strong> +250780332779
             </p>
           </CardContent>
         </Card>
