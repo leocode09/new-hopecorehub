@@ -32,7 +32,7 @@ const BottomNav = () => {
                   : "text-gray-600 hover:text-[#9E78E9] hover:bg-[#D3E4FD]/20"
               }`}
             >
-              <Icon className="w-6 h-6" />
+              <Icon className="w-12 h-12" />
               <span className="text-xs font-medium">{label}</span>
             </Button>
           );
