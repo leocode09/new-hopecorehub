@@ -16,7 +16,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-area-pb">
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 py-3 pb-safe">
       <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
@@ -26,13 +26,13 @@ const BottomNav = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center p-2 h-auto space-y-1 touch-target ${
+              className={`flex flex-col items-center p-2 h-auto space-y-1 touch-target min-h-[64px] ${
                 isActive 
                   ? "text-[#9E78E9] bg-[#D3E4FD]/30" 
                   : "text-gray-600 hover:text-[#9E78E9] hover:bg-[#D3E4FD]/20"
               }`}
             >
-              <Icon className="w-12 h-12" />
+              <Icon className="w-8 h-8" />
               <span className="text-xs font-medium">{label}</span>
             </Button>
           );

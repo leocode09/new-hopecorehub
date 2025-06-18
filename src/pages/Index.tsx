@@ -46,12 +46,16 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20 pt-safe">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
         <header className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-[#9E78E9] to-[#8B69D6] rounded-full flex items-center justify-center mb-4">
-            <Heart className="w-10 h-10 text-white" />
+          <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+            <img 
+              src="/lovable-uploads/28737141-f0a2-4128-9db2-1b925db984a1.png" 
+              alt="HopeCore Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-[#9E78E9] mb-2">{t('appName')}</h1>
           <p className="text-gray-600 dark:text-gray-300">{t('tagline')}</p>
