@@ -5,23 +5,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthEnhancements } from "@/hooks/useAuthEnhancements";
 import { Shield, Heart, ArrowLeft } from "lucide-react";
+import PasswordResetForm from "@/components/auth/PasswordResetForm";
+import EmailVerificationStatus from "@/components/auth/EmailVerificationStatus";
+import AccountDeletion from "@/components/auth/AccountDeletion";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [activeTab, setActiveTab] = useState("signin");
+  const { signIn, signUp, user } = useAuth();
+  const { logLoginActivity } = useAuthEnhancements();
   const navigate = useNavigate();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     const { error } = await signIn(email, password);
+    await logLoginActivity('signin', !error);
+    
     if (!error) {
+      if (rememberMe) {
+        localStorage.setItem('hopecore-remember-email', email);
+      } else {
+        localStorage.removeItem('hopecore-remember-email');
+      }
       navigate("/");
     }
     setLoading(false);
@@ -30,9 +46,63 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
     const { error } = await signUp(email, password, fullName);
+    await logLoginActivity('signup', !error);
+    
     setLoading(false);
   };
+
+  // Load remembered email on component mount
+  useState(() => {
+    const rememberedEmail = localStorage.getItem('hopecore-remember-email');
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  });
+
+  // If user is logged in, show account management
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="mb-4 text-[#9E78E9] hover:text-[#8B69D6]"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+
+          <Card className="border-[#9E78E9]/20">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-[#9E78E9] rounded-full flex items-center justify-center mb-4">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl text-[#9E78E9]">Account Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <EmailVerificationStatus />
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-[#D3E4FD]/20 rounded-lg">
+                  <h3 className="font-semibold text-[#9E78E9] mb-2">Account Information</h3>
+                  <p className="text-sm text-gray-600">Email: {user.email}</p>
+                  <p className="text-sm text-gray-600">
+                    Status: {user.email_confirmed_at ? 'Verified' : 'Unverified'}
+                  </p>
+                </div>
+                
+                <AccountDeletion />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -55,10 +125,11 @@ const Auth = () => {
             <p className="text-gray-600 dark:text-gray-300">Your safe space for healing and support</p>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="reset">Reset</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
@@ -85,6 +156,18 @@ const Auth = () => {
                       placeholder="Your password"
                     />
                   </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember-me"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label htmlFor="remember-me" className="text-sm">
+                      Remember me
+                    </Label>
+                  </div>
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-[#9E78E9] hover:bg-[#8B69D6]"
@@ -138,6 +221,10 @@ const Auth = () => {
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
+              </TabsContent>
+
+              <TabsContent value="reset">
+                <PasswordResetForm />
               </TabsContent>
             </Tabs>
 
