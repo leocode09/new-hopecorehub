@@ -6,10 +6,6 @@ const config: CapacitorConfig = {
   appName: 'HopeCore Hub',
   webDir: 'dist',
   bundledWebRuntime: false,
-  server: {
-    url: "https://c974d77c-52a2-4ff6-901d-79dcc1ee224a.lovableproject.com?forceHideBadge=true",
-    cleartext: true
-  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
