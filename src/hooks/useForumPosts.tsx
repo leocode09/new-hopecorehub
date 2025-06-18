@@ -16,19 +16,35 @@ export interface ForumPost {
   isLiked?: boolean;
 }
 
+const POSTS_PER_PAGE = 10;
+
 export const useForumPosts = () => {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (page: number = 1) => {
     try {
       setLoading(true);
+      const startIndex = (page - 1) * POSTS_PER_PAGE;
+
+      // Get total count
+      const { count } = await supabase
+        .from('forum_posts')
+        .select('*', { count: 'exact', head: true });
+
+      const totalCount = count || 0;
+      setTotalPages(Math.ceil(totalCount / POSTS_PER_PAGE));
+
+      // Get posts for current page
       const { data: postsData, error } = await supabase
         .from('forum_posts')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(startIndex, startIndex + POSTS_PER_PAGE - 1);
 
       if (error) throw error;
 
@@ -48,6 +64,7 @@ export const useForumPosts = () => {
       }
 
       setPosts(postsWithLikes);
+      setCurrentPage(page);
     } catch (error: any) {
       toast({
         title: "Error loading posts",
@@ -85,7 +102,7 @@ export const useForumPosts = () => {
         description: "Your post has been shared with the community"
       });
 
-      await fetchPosts(); // Refresh posts
+      await fetchPosts(1); // Refresh to first page
       return true;
     } catch (error: any) {
       toast({
@@ -161,8 +178,11 @@ export const useForumPosts = () => {
   return {
     posts,
     loading,
+    currentPage,
+    totalPages,
     createPost,
     toggleLike,
-    refreshPosts: fetchPosts
+    refreshPosts: () => fetchPosts(currentPage),
+    changePage: fetchPosts
   };
 };

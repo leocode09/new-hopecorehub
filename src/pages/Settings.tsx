@@ -6,10 +6,18 @@ import { Label } from "@/components/ui/label";
 import BottomNav from "@/components/BottomNav";
 import AccessibilitySettings from "@/components/accessibility/AccessibilitySettings";
 import { useTheme } from "@/components/ThemeProvider";
-import { Settings as SettingsIcon, Moon, Sun, Globe, Volume2, Bell, Shield } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { Settings as SettingsIcon, Moon, Sun, Globe, Volume2, Bell, Shield, Wifi, WifiOff, Smartphone } from "lucide-react";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const { preferences, updatePreferences, loading } = useUserPreferences();
+
+  const handlePreferenceChange = async (key: keyof typeof preferences, value: boolean) => {
+    if (preferences) {
+      await updatePreferences({ [key]: value });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#D3E4FD] to-white dark:from-gray-900 dark:to-gray-800 pb-20">
@@ -27,6 +35,56 @@ const Settings = () => {
         <div className="mb-6">
           <AccessibilitySettings />
         </div>
+
+        {/* Data & Performance */}
+        <Card className="mb-6 border-[#9E78E9]/20">
+          <CardHeader>
+            <CardTitle className="text-lg text-[#9E78E9] flex items-center">
+              <Smartphone className="w-5 h-5 mr-2" />
+              Data & Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Low Data Mode</Label>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Reduce data usage for remote areas</p>
+              </div>
+              <Switch
+                checked={preferences?.low_data_mode || false}
+                onCheckedChange={(checked) => handlePreferenceChange('low_data_mode', checked)}
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Image Lazy Loading</Label>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Load images only when needed</p>
+              </div>
+              <Switch
+                checked={preferences?.lazy_loading_enabled || false}
+                onCheckedChange={(checked) => handlePreferenceChange('lazy_loading_enabled', checked)}
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {preferences?.offline_mode_enabled ? <WifiOff className="w-4 h-4 text-[#9E78E9]" /> : <Wifi className="w-4 h-4 text-[#9E78E9]" />}
+                <div>
+                  <Label>Offline Mode</Label>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Cache content for offline access</p>
+                </div>
+              </div>
+              <Switch
+                checked={preferences?.offline_mode_enabled || false}
+                onCheckedChange={(checked) => handlePreferenceChange('offline_mode_enabled', checked)}
+                disabled={loading}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Appearance */}
         <Card className="mb-6 border-[#9E78E9]/20">

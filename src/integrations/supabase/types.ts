@@ -78,6 +78,7 @@ export type Database = {
           is_edited: boolean | null
           likes_count: number | null
           replies_count: number | null
+          search_vector: unknown | null
           title: string | null
           updated_at: string
           user_id: string | null
@@ -91,6 +92,7 @@ export type Database = {
           is_edited?: boolean | null
           likes_count?: number | null
           replies_count?: number | null
+          search_vector?: unknown | null
           title?: string | null
           updated_at?: string
           user_id?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           is_edited?: boolean | null
           likes_count?: number | null
           replies_count?: number | null
+          search_vector?: unknown | null
           title?: string | null
           updated_at?: string
           user_id?: string | null
@@ -200,6 +203,63 @@ export type Database = {
           profile_picture_url?: string | null
           updated_at?: string
           uses_avatar?: boolean | null
+        }
+        Relationships: []
+      }
+      search_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          search_term: string
+          search_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          search_term: string
+          search_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          search_term?: string
+          search_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          lazy_loading_enabled: boolean | null
+          low_data_mode: boolean | null
+          offline_mode_enabled: boolean | null
+          onboarding_completed: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lazy_loading_enabled?: boolean | null
+          low_data_mode?: boolean | null
+          offline_mode_enabled?: boolean | null
+          onboarding_completed?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lazy_loading_enabled?: boolean | null
+          low_data_mode?: boolean | null
+          offline_mode_enabled?: boolean | null
+          onboarding_completed?: boolean | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
