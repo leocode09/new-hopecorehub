@@ -101,8 +101,8 @@ const SOSButton = () => {
 
       {/* Initial Comforting Dialog */}
       <Dialog open={showInitialDialog} onOpenChange={setShowInitialDialog}>
-        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto">
-          <DialogHeader className="space-y-3">
+        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto text-center">
+          <DialogHeader className="space-y-3 text-center">
             <DialogTitle className="flex items-center justify-center text-[#9E78E9] text-center">
               <Heart className="w-5 h-5 mr-2" />
               You Are Not Alone
@@ -120,7 +120,7 @@ const SOSButton = () => {
               </p>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col space-y-3 mt-6">
+          <DialogFooter className="flex flex-col space-y-3 mt-6 items-center">
             <Button 
               onClick={handleCallOption}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-3"
@@ -149,8 +149,8 @@ const SOSButton = () => {
 
       {/* Contact Selection Dialog */}
       <Dialog open={showContactOptions} onOpenChange={setShowContactOptions}>
-        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto text-center">
+          <DialogHeader className="text-center">
             <DialogTitle className="flex items-center justify-center text-red-600 text-center">
               <Phone className="w-5 h-5 mr-2" />
               Choose Emergency Contact
@@ -165,9 +165,9 @@ const SOSButton = () => {
                 key={contact.number}
                 onClick={() => handleContactSelect(contact)}
                 variant="outline"
-                className="w-full h-auto p-4 text-left justify-start border-gray-200 hover:border-red-300 hover:bg-red-50"
+                className="w-full h-auto p-4 text-center justify-center border-gray-200 hover:border-red-300 hover:bg-red-50"
               >
-                <div className="w-full">
+                <div className="w-full text-center">
                   <div className="font-semibold text-sm">{contact.name}</div>
                   <div className="text-sm text-gray-600">{contact.number}</div>
                   <div className="text-xs text-gray-500 mt-1">{contact.description}</div>
@@ -175,7 +175,7 @@ const SOSButton = () => {
               </Button>
             ))}
           </div>
-          <DialogFooter className="mt-6">
+          <DialogFooter className="mt-6 flex justify-center">
             <Button 
               variant="ghost" 
               onClick={() => setShowContactOptions(false)}
@@ -189,8 +189,8 @@ const SOSButton = () => {
 
       {/* Call Confirmation Dialog */}
       <AlertDialog open={showCallConfirmation} onOpenChange={setShowCallConfirmation}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto">
-          <AlertDialogHeader>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto text-center">
+          <AlertDialogHeader className="text-center">
             <AlertDialogTitle className="flex items-center justify-center text-red-600 text-center">
               <AlertTriangle className="w-5 h-5 mr-2" />
               Confirm Emergency Call
@@ -208,7 +208,7 @@ const SOSButton = () => {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6">
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6 justify-center items-center">
             <AlertDialogCancel 
               onClick={() => setShowCallConfirmation(false)}
               className="w-full sm:w-auto"
@@ -227,8 +227,8 @@ const SOSButton = () => {
 
       {/* Text Confirmation Dialog */}
       <AlertDialog open={showTextConfirmation} onOpenChange={setShowTextConfirmation}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto">
-          <AlertDialogHeader>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto text-center">
+          <AlertDialogHeader className="text-center">
             <AlertDialogTitle className="flex items-center justify-center text-[#9E78E9] text-center">
               <MessageSquare className="w-5 h-5 mr-2" />
               Text HopeCore Hub Team
@@ -237,7 +237,7 @@ const SOSButton = () => {
               <p>
                 You can reach our support team via text message or WhatsApp at:
               </p>
-              <p className="font-mono text-base bg-gray-100 p-3 rounded text-center">
+              <p className="font-mono text-base bg-gray-100 p-3 rounded text-center mx-auto max-w-fit">
                 +250 780-332-779
               </p>
               <p className="text-sm">
@@ -248,7 +248,7 @@ const SOSButton = () => {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6">
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6 justify-center items-center">
             <AlertDialogCancel 
               onClick={() => setShowTextConfirmation(false)}
               className="w-full sm:w-auto"
