@@ -39,7 +39,7 @@ const ProfileAction = ({ size = 'md' }: ProfileActionProps) => {
   };
 
   const sizeClasses = {
-    sm: 'w-6 h-6',
+    sm: 'w-10 h-10', // Increased from w-6 h-6 to match settings icon size
     md: 'w-8 h-8', 
     lg: 'w-10 h-10'
   };
