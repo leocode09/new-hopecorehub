@@ -101,29 +101,29 @@ const SOSButton = () => {
 
       {/* Initial Comforting Dialog */}
       <Dialog open={showInitialDialog} onOpenChange={setShowInitialDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-[#9E78E9]">
+        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center justify-center text-[#9E78E9] text-center">
               <Heart className="w-5 h-5 mr-2" />
               You Are Not Alone
             </DialogTitle>
-            <DialogDescription className="space-y-3 text-center">
+            <DialogDescription className="space-y-4 text-center px-2">
               <p className="text-lg font-medium text-gray-800">
                 Everything is going to be okay. 💜
               </p>
-              <p>
+              <p className="text-sm">
                 If you're in immediate danger, we're here to help connect you with the right support. 
                 You are brave for reaching out.
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 font-medium">
                 How would you like to get help?
               </p>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex-col space-y-2">
+          <DialogFooter className="flex flex-col space-y-3 mt-6">
             <Button 
               onClick={handleCallOption}
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3"
             >
               <Phone className="w-4 h-4 mr-2" />
               Make a Phone Call
@@ -131,7 +131,7 @@ const SOSButton = () => {
             <Button 
               onClick={handleTextOption}
               variant="outline" 
-              className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#9E78E9]/10"
+              className="w-full border-[#9E78E9] text-[#9E78E9] hover:bg-[#9E78E9]/10 py-3"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Send a Text Message
@@ -139,7 +139,7 @@ const SOSButton = () => {
             <Button 
               variant="ghost" 
               onClick={resetDialogs}
-              className="w-full text-gray-500"
+              className="w-full text-gray-500 py-2"
             >
               Cancel
             </Button>
@@ -149,17 +149,17 @@ const SOSButton = () => {
 
       {/* Contact Selection Dialog */}
       <Dialog open={showContactOptions} onOpenChange={setShowContactOptions}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center text-red-600">
+            <DialogTitle className="flex items-center justify-center text-red-600 text-center">
               <Phone className="w-5 h-5 mr-2" />
               Choose Emergency Contact
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-center">
               Select who you'd like to call for immediate assistance:
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             {emergencyContacts.map((contact) => (
               <Button
                 key={contact.number}
@@ -167,15 +167,15 @@ const SOSButton = () => {
                 variant="outline"
                 className="w-full h-auto p-4 text-left justify-start border-gray-200 hover:border-red-300 hover:bg-red-50"
               >
-                <div>
-                  <div className="font-semibold">{contact.name}</div>
+                <div className="w-full">
+                  <div className="font-semibold text-sm">{contact.name}</div>
                   <div className="text-sm text-gray-600">{contact.number}</div>
-                  <div className="text-xs text-gray-500">{contact.description}</div>
+                  <div className="text-xs text-gray-500 mt-1">{contact.description}</div>
                 </div>
               </Button>
             ))}
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button 
               variant="ghost" 
               onClick={() => setShowContactOptions(false)}
@@ -189,18 +189,18 @@ const SOSButton = () => {
 
       {/* Call Confirmation Dialog */}
       <AlertDialog open={showCallConfirmation} onOpenChange={setShowCallConfirmation}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center text-red-600">
+            <AlertDialogTitle className="flex items-center justify-center text-red-600 text-center">
               <AlertTriangle className="w-5 h-5 mr-2" />
               Confirm Emergency Call
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
+            <AlertDialogDescription className="space-y-3 text-center">
               <p>
                 You are about to call <strong>{selectedContact?.name}</strong> at{" "}
                 <strong>{selectedContact?.number}</strong>.
               </p>
-              <p>
+              <p className="text-sm">
                 This will open your phone app and dial the number. Local carrier charges may apply.
               </p>
               <p className="text-sm font-medium text-red-700">
@@ -208,13 +208,16 @@ const SOSButton = () => {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowCallConfirmation(false)}>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6">
+            <AlertDialogCancel 
+              onClick={() => setShowCallConfirmation(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmCall}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               Yes, Call Now
             </AlertDialogAction>
@@ -224,20 +227,20 @@ const SOSButton = () => {
 
       {/* Text Confirmation Dialog */}
       <AlertDialog open={showTextConfirmation} onOpenChange={setShowTextConfirmation}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md mx-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center text-[#9E78E9]">
+            <AlertDialogTitle className="flex items-center justify-center text-[#9E78E9] text-center">
               <MessageSquare className="w-5 h-5 mr-2" />
               Text HopeCore Hub Team
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
+            <AlertDialogDescription className="space-y-4 text-center">
               <p>
                 You can reach our support team via text message or WhatsApp at:
               </p>
-              <p className="font-mono text-lg text-center bg-gray-100 p-2 rounded">
+              <p className="font-mono text-base bg-gray-100 p-3 rounded text-center">
                 +250 780-332-779
               </p>
-              <p>
+              <p className="text-sm">
                 This will open your messaging app. Local carrier charges may apply for SMS.
               </p>
               <p className="text-sm font-medium text-[#9E78E9]">
@@ -245,13 +248,16 @@ const SOSButton = () => {
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowTextConfirmation(false)}>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 mt-6">
+            <AlertDialogCancel 
+              onClick={() => setShowTextConfirmation(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmText}
-              className="bg-[#9E78E9] hover:bg-[#8B69D6]"
+              className="bg-[#9E78E9] hover:bg-[#8B69D6] w-full sm:w-auto"
             >
               Open Messaging App
             </AlertDialogAction>
