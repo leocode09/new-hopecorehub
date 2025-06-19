@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         setUser(null);
         setSession(null);
+        console.log('User is in guest mode');
       }
       return;
     }
@@ -68,8 +69,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             title: "Signed out",
             description: "You've been successfully signed out.",
           });
-        } else if (event === 'USER_UPDATED' && newSession?.user) {
-          console.log('User updated:', newSession.user);
         }
       }
     );
@@ -86,6 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(initialSession?.user ?? null);
           setLoading(false);
           setIsGuest(false);
+          console.log('Initial session loaded:', initialSession?.user?.email || 'No user');
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: email.trim().toLowerCase(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: fullName || 'Anonymous User'
           }
@@ -129,6 +129,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           errorMessage = 'Please enter a valid email address.';
         } else if (error.message.includes('Password should be at least')) {
           errorMessage = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('Signup is disabled')) {
+          errorMessage = 'Account creation is temporarily disabled. Please try again later.';
         }
         
         toast({
@@ -185,6 +187,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many login attempts. Please wait a moment before trying again.';
         }
 
         toast({
@@ -236,6 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const switchToAccountMode = () => {
     localStorage.removeItem("hopecore-guest-mode");
     setIsGuest(false);
+    console.log('Switched from guest mode to account mode');
   };
 
   return (

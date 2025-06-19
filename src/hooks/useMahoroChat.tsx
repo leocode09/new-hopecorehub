@@ -22,7 +22,7 @@ export const useMahoroChat = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
 
   const sendMessage = useCallback(async (message: string, language: string = 'en') => {
     if (!message.trim() || isLoading) return;
@@ -38,10 +38,15 @@ export const useMahoroChat = () => {
     setIsLoading(true);
 
     try {
+      // Determine user ID - use 'anonymous' for guest users or when no user is authenticated
+      const userId = user?.id || (isGuest ? 'guest' : 'anonymous');
+      
+      console.log('Sending message with user ID:', userId);
+
       const { data, error } = await supabase.functions.invoke('mahoro-chat', {
         body: {
           message,
-          userId: user?.id || 'anonymous',
+          userId,
           sessionId,
           language
         }
@@ -54,7 +59,7 @@ export const useMahoroChat = () => {
 
       const botResponse: ChatMessage = {
         id: Date.now() + 1,
-        text: data.response,
+        text: data.message,
         isBot: true,
         timestamp: new Date().toLocaleTimeString()
       };
@@ -81,7 +86,7 @@ export const useMahoroChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, sessionId, isLoading]);
+  }, [user?.id, isGuest, sessionId, isLoading]);
 
   return {
     messages,

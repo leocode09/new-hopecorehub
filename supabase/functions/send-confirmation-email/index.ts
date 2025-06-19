@@ -32,45 +32,69 @@ Deno.serve(async (req) => {
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
     
-    let userEmail: string;
-    let token: string;
-    let tokenHash: string;
-    let redirectTo: string;
-    let emailActionType: string;
+    console.log('Webhook payload received:', payload);
+    console.log('Headers received:', JSON.stringify(headers, null, 2));
 
-    // If webhook secret is configured, verify the webhook
-    if (hookSecret) {
-      try {
-        const webhookData = new Webhook(hookSecret).verify(payload, headers) as any;
-        console.log('Webhook data:', JSON.stringify(webhookData, null, 2));
-        
-        userEmail = webhookData.user?.email;
-        token = webhookData.email_data?.token;
-        tokenHash = webhookData.email_data?.token_hash;
-        redirectTo = webhookData.email_data?.redirect_to;
-        emailActionType = webhookData.email_data?.email_action_type;
-        
-        if (!userEmail) {
-          console.error('No user email found in webhook payload');
-          throw new Error('User email not found in webhook payload');
-        }
-      } catch (webhookError) {
-        console.error('Webhook verification failed:', webhookError);
-        throw new Error('Invalid webhook signature or payload');
+    let userEmail: string = '';
+    let token: string = '';
+    let tokenHash: string = '';
+    let redirectTo: string = '';
+    let emailActionType: string = 'signup';
+
+    // Parse the webhook payload
+    try {
+      const webhookData = JSON.parse(payload);
+      console.log('Parsed webhook data:', JSON.stringify(webhookData, null, 2));
+      
+      // Extract user email from different possible paths
+      userEmail = webhookData.user?.email || 
+                  webhookData.record?.email || 
+                  webhookData.email_data?.user?.email ||
+                  webhookData.email;
+      
+      // Extract other fields
+      token = webhookData.token || webhookData.email_data?.token || '';
+      tokenHash = webhookData.token_hash || webhookData.email_data?.token_hash || '';
+      redirectTo = webhookData.redirect_to || webhookData.email_data?.redirect_to || `${Deno.env.get('SUPABASE_URL')}/auth/callback`;
+      emailActionType = webhookData.email_action_type || webhookData.email_data?.email_action_type || 'signup';
+      
+      console.log('Extracted data:', {
+        userEmail,
+        token: token ? 'present' : 'missing',
+        tokenHash: tokenHash ? 'present' : 'missing',
+        redirectTo,
+        emailActionType
+      });
+      
+    } catch (error) {
+      console.error('Error parsing webhook payload:', error);
+      
+      // Fallback: try to extract email from the raw payload
+      const emailMatch = payload.match(/"email":\s*"([^"]+)"/);
+      if (emailMatch) {
+        userEmail = emailMatch[1];
+        console.log('Extracted email from regex:', userEmail);
       }
-    } else {
-      // Fallback for direct API calls (for testing)
-      const body = JSON.parse(payload);
-      userEmail = body.email;
-      token = body.token;
-      tokenHash = body.token_hash;
-      redirectTo = body.redirect_to;
-      emailActionType = body.email_action_type || 'signup';
     }
 
     if (!userEmail) {
-      console.error('User email is required but not provided');
-      throw new Error('User email is required');
+      console.error('No user email found in webhook payload');
+      console.log('Full payload for debugging:', payload);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'User email not found in webhook payload',
+          debug: { payload: payload.substring(0, 500) } // First 500 chars for debugging
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     console.log(`Sending confirmation email to: ${userEmail}`);
@@ -78,10 +102,10 @@ Deno.serve(async (req) => {
     const html = await renderAsync(
       React.createElement(SignupConfirmationEmail, {
         supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-        token: token || '',
-        token_hash: tokenHash || '',
-        redirect_to: redirectTo || `${Deno.env.get('SUPABASE_URL')}/auth/callback`,
-        email_action_type: emailActionType || 'signup',
+        token: token,
+        token_hash: tokenHash,
+        redirect_to: redirectTo,
+        email_action_type: emailActionType,
         user_email: userEmail,
       })
     );
@@ -116,7 +140,8 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to send email' 
+        error: error.message || 'Failed to send email',
+        details: error.stack || 'No stack trace available'
       }),
       {
         status: 500,

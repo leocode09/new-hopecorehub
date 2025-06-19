@@ -17,7 +17,7 @@ serve(async (req) => {
     const { message, userId, sessionId, language = 'en' } = await req.json()
     
     console.log('Mahoro chat request:', {
-      userId,
+      userId: userId || 'anonymous',
       sessionId,
       language,
       messageLength: message?.length
@@ -30,8 +30,10 @@ serve(async (req) => {
     }
 
     // Determine if user is anonymous or authenticated
-    const isAnonymous = !userId || userId === 'anonymous'
+    const isAnonymous = !userId || userId === 'anonymous' || userId === 'guest'
     const actualUserId = isAnonymous ? null : userId
+
+    console.log('Processing request for:', isAnonymous ? 'anonymous user' : `user ${actualUserId}`)
 
     // Create a system prompt based on language
     const systemPrompts = {
@@ -85,8 +87,8 @@ serve(async (req) => {
 
     console.log('Claude response received, length:', aiMessage.length)
 
-    // Only try to store messages if we have a valid user ID (not anonymous)
-    if (actualUserId && sessionId) {
+    // Only try to store messages if we have a valid authenticated user ID
+    if (actualUserId && sessionId && !isAnonymous) {
       try {
         // Import Supabase client
         const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
@@ -126,10 +128,10 @@ serve(async (req) => {
         }
       } catch (dbError) {
         console.error('Database operation failed:', dbError)
-        // Continue without storing - don't fail the request
+        // Continue without storing - don't fail the request for anonymous users
       }
     } else {
-      console.log('Skipping message storage for anonymous user')
+      console.log('Skipping message storage for anonymous/guest user')
     }
 
     return new Response(JSON.stringify({ 

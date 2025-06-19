@@ -6,17 +6,18 @@ import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowGuests?: boolean; // New prop to allow guest access
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children, allowGuests = false }: ProtectedRouteProps) => {
+  const { user, loading, isGuest } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
+    if (!loading && !user && !isGuest && !allowGuests) {
+      navigate('/welcome');
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isGuest, allowGuests, navigate]);
 
   if (loading) {
     return (
@@ -36,11 +37,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) {
-    return null;
+  // Allow access if user is authenticated, is a guest (and guests are allowed), or if guests are specifically allowed
+  if (user || (isGuest && allowGuests) || allowGuests) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return null;
 };
 
 export default ProtectedRoute;
