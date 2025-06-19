@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, Heart, ArrowLeft } from "lucide-react";
+import { Shield, Heart, ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const Welcome = () => {
   const [email, setEmail] = useState("");
@@ -28,13 +29,30 @@ const Welcome = () => {
       setShowConsent(true);
       return;
     }
+    
     setLoading(true);
-    const identifier = email || phone;
-    const { error } = await signIn(identifier, password);
-    if (!error) {
-      navigate("/");
+    try {
+      const identifier = email || phone;
+      if (!identifier || !password) {
+        toast({
+          title: "Missing Information",
+          description: "Please enter both email/phone and password.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const { error } = await signIn(identifier, password);
+      if (!error) {
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in.",
+        });
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -43,13 +61,39 @@ const Welcome = () => {
       setShowConsent(true);
       return;
     }
+    
     setLoading(true);
-    const identifier = email || phone;
-    const { error } = await signUp(identifier, password, fullName);
-    if (!error) {
-      navigate("/");
+    try {
+      const identifier = email || phone;
+      if (!identifier || !password) {
+        toast({
+          title: "Missing Information",
+          description: "Please enter both email/phone and password.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (password.length < 6) {
+        toast({
+          title: "Password Too Short",
+          description: "Password must be at least 6 characters long.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const { error } = await signUp(identifier, password, fullName);
+      if (!error) {
+        toast({
+          title: "Account Created!",
+          description: "Please check your email to confirm your account.",
+        });
+        // Don't navigate immediately for signup - wait for email confirmation
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleContinueAsGuest = () => {
@@ -59,6 +103,10 @@ const Welcome = () => {
     }
     // Store guest mode in localStorage
     localStorage.setItem("hopecore-guest-mode", "true");
+    toast({
+      title: "Welcome Guest!",
+      description: "You can browse as a guest. Create an account anytime for full features.",
+    });
     navigate("/");
   };
 
@@ -156,10 +204,10 @@ const Welcome = () => {
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue="signin" className="w-full" onValueChange={(value) => setAuthType(value as 'signin' | 'signup')}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin" onClick={() => setAuthType('signin')}>Sign In</TabsTrigger>
-              <TabsTrigger value="signup" onClick={() => setAuthType('signup')}>Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
@@ -181,6 +229,7 @@ const Welcome = () => {
                       }
                     }}
                     required
+                    disabled={loading}
                     placeholder="your@email.com or +250123456789"
                   />
                 </div>
@@ -192,6 +241,7 @@ const Welcome = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={loading}
                     placeholder="Your password"
                   />
                 </div>
@@ -201,7 +251,14 @@ const Welcome = () => {
                   disabled={loading}
                   size="lg"
                 >
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -215,6 +272,7 @@ const Welcome = () => {
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    disabled={loading}
                     placeholder="Your name (or leave blank for anonymous)"
                   />
                 </div>
@@ -235,6 +293,7 @@ const Welcome = () => {
                       }
                     }}
                     required
+                    disabled={loading}
                     placeholder="your@email.com or +250123456789"
                   />
                 </div>
@@ -246,7 +305,8 @@ const Welcome = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="Choose a strong password"
+                    disabled={loading}
+                    placeholder="Choose a strong password (min. 6 characters)"
                     minLength={6}
                   />
                 </div>
@@ -256,7 +316,14 @@ const Welcome = () => {
                   disabled={loading}
                   size="lg"
                 >
-                  {loading ? "Creating account..." : "Create Account"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -275,6 +342,7 @@ const Welcome = () => {
               variant="ghost"
               className="w-full text-gray-600 hover:bg-[#D3E4FD]/30"
               size="lg"
+              disabled={loading}
             >
               Continue as Guest
             </Button>

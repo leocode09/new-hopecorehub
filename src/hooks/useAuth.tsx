@@ -60,15 +60,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Handle specific auth events with toast notifications
         if (event === 'SIGNED_IN' && newSession?.user) {
-          toast({
-            title: "Welcome back!",
-            description: "You've successfully signed in.",
-          });
+          console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out",
-            description: "You've been successfully signed out.",
-          });
+          console.log('User signed out');
         }
       }
     );
@@ -112,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: email.trim().toLowerCase(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName || 'Anonymous User'
           }
@@ -141,18 +135,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
+      console.log('Sign up response:', { user: data.user?.email, session: !!data.session });
+
       if (data.user && !data.session) {
         // User needs to confirm email
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration.",
-        });
+        console.log('User created, email confirmation required');
       } else if (data.session) {
         // User was signed up and signed in immediately
-        toast({
-          title: "Welcome to HopeCore Hub!",
-          description: "Your account has been created successfully.",
-        });
+        console.log('User created and signed in immediately');
       }
 
       return { error: null };
@@ -225,6 +215,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Sign out failed",
           description: error.message,
           variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Signed out",
+          description: "You've been successfully signed out.",
         });
       }
     } catch (error: any) {

@@ -33,7 +33,6 @@ Deno.serve(async (req) => {
     const headers = Object.fromEntries(req.headers);
     
     console.log('Webhook payload received:', payload);
-    console.log('Headers received:', JSON.stringify(headers, null, 2));
 
     let userEmail: string = '';
     let token: string = '';
@@ -85,7 +84,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           error: 'User email not found in webhook payload',
-          debug: { payload: payload.substring(0, 500) } // First 500 chars for debugging
+          debug: { payload: payload.substring(0, 500) }
         }),
         {
           status: 400,
@@ -110,8 +109,9 @@ Deno.serve(async (req) => {
       })
     );
 
+    // Use the verified Resend domain to avoid domain verification issues
     const { error } = await resend.emails.send({
-      from: 'HopeCore Hub <noreply@hopecorehub.com>',
+      from: 'HopeCore Hub <onboarding@resend.dev>',
       to: [userEmail],
       subject: 'Welcome to HopeCore Hub - Confirm Your Account',
       html,
