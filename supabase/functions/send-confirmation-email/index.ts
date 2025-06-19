@@ -2,10 +2,6 @@
 import React from 'npm:react@18.3.1';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { Resend } from 'npm:resend@4.0.0';
-import { renderAsync } from 'npm:@react-email/components@0.0.22';
-import { SignupConfirmationEmail } from './_templates/signup-confirmation.tsx';
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,10 +28,6 @@ Deno.serve(async (req) => {
     console.log('Webhook payload received:', payload);
 
     let userEmail: string = '';
-    let token: string = '';
-    let tokenHash: string = '';
-    let redirectTo: string = '';
-    let emailActionType: string = 'signup';
 
     // Parse the webhook payload
     try {
@@ -47,18 +39,7 @@ Deno.serve(async (req) => {
                   webhookData.email_data?.user?.email ||
                   webhookData.email;
       
-      token = webhookData.token || webhookData.email_data?.token || '';
-      tokenHash = webhookData.token_hash || webhookData.email_data?.token_hash || '';
-      redirectTo = webhookData.redirect_to || webhookData.email_data?.redirect_to || `${Deno.env.get('SUPABASE_URL')}/auth/callback`;
-      emailActionType = webhookData.email_action_type || webhookData.email_data?.email_action_type || 'signup';
-      
-      console.log('Extracted data:', {
-        userEmail,
-        token: token ? 'present' : 'missing',
-        tokenHash: tokenHash ? 'present' : 'missing',
-        redirectTo,
-        emailActionType
-      });
+      console.log('Extracted email:', userEmail);
       
     } catch (error) {
       console.error('Error parsing webhook payload:', error);
@@ -86,60 +67,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Attempting to send confirmation email to: ${userEmail}`);
+    console.log(`Email confirmation disabled - skipping email send for: ${userEmail}`);
 
-    // Check if the email is the verified owner email
-    const verifiedOwnerEmail = 'ingabohopecore@gmail.com';
-    
-    if (userEmail.toLowerCase() !== verifiedOwnerEmail.toLowerCase()) {
-      console.log(`Email ${userEmail} is not the verified owner email. Skipping email send but returning success.`);
-      
-      // Return success without actually sending the email
-      // This prevents the 500 error while we wait for domain verification
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Email confirmation skipped - domain verification required',
-          note: 'User can still confirm via the confirmation link manually'
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders,
-          },
-        }
-      );
-    }
-
-    // Only send email for the verified owner email
-    const html = await renderAsync(
-      React.createElement(SignupConfirmationEmail, {
-        supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-        token: token,
-        token_hash: tokenHash,
-        redirect_to: redirectTo,
-        email_action_type: emailActionType,
-        user_email: userEmail,
-      })
-    );
-
-    const { error } = await resend.emails.send({
-      from: 'HopeCore Hub <onboarding@resend.dev>',
-      to: [userEmail],
-      subject: 'Welcome to HopeCore Hub - Confirm Your Account',
-      html,
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      throw error;
-    }
-
-    console.log('Confirmation email sent successfully');
-
+    // Return success without sending any email (email confirmation disabled)
     return new Response(
-      JSON.stringify({ success: true, message: 'Email sent successfully' }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'Email confirmation disabled - account ready for use',
+        note: 'User can sign in immediately without email confirmation'
+      }),
       {
         status: 200,
         headers: {
@@ -154,7 +90,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to send email'
+        error: error.message || 'Failed to process email confirmation'
       }),
       {
         status: 500,

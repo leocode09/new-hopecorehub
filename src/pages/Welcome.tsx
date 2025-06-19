@@ -18,6 +18,7 @@ const Welcome = () => {
   const [loading, setLoading] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
   const [authType, setAuthType] = useState<'signin' | 'signup' | 'guest'>('signin');
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const Welcome = () => {
     }
 
     if (!consentGiven) {
+      setAuthType('signin');
       setShowConsent(true);
       return;
     }
@@ -76,6 +78,7 @@ const Welcome = () => {
     }
 
     if (!consentGiven) {
+      setAuthType('signup');
       setShowConsent(true);
       return;
     }
@@ -85,12 +88,13 @@ const Welcome = () => {
       const { error } = await signUp(email, password, fullName || 'Anonymous User');
       if (!error) {
         toast({
-          title: "Account Created!",
+          title: "Account Created Successfully!",
           description: "You can now sign in with your credentials.",
         });
-        // Switch to sign in tab after successful signup
-        setAuthType('signin');
-        setPassword(''); // Clear password for security
+        // Stay on signup tab but clear the form
+        setPassword('');
+        setFullName('');
+        // Don't switch tabs automatically - let user manually switch to sign in
       }
     } finally {
       setLoading(false);
@@ -99,6 +103,7 @@ const Welcome = () => {
 
   const handleContinueAsGuest = () => {
     if (!consentGiven) {
+      setAuthType('guest');
       setShowConsent(true);
       return;
     }
@@ -205,7 +210,7 @@ const Welcome = () => {
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full" onValueChange={(value) => setAuthType(value as 'signin' | 'signup')}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>

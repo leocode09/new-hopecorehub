@@ -100,6 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       console.log('Attempting to sign up user:', email);
       
+      // Sign up without email confirmation requirement
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -133,20 +134,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      console.log('Sign up response:', { user: data.user?.email, session: !!data.session });
+      console.log('Sign up response:', { user: data.user?.id, session: !!data.session });
 
-      // For simplified flow, we'll allow immediate sign in after signup
-      if (data.user && !data.session) {
-        console.log('User created, but no immediate session - this is normal');
+      // Account created successfully
+      if (data.user) {
+        console.log('User account created successfully');
         toast({
           title: "Account created successfully!",
-          description: "You can now sign in with your credentials.",
-        });
-      } else if (data.session) {
-        console.log('User created and signed in immediately');
-        toast({
-          title: "Welcome to HopeCore Hub!",
-          description: "Your account has been created successfully.",
+          description: "Your account is ready. You can now sign in.",
         });
       }
 
@@ -181,7 +176,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.';
         } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          errorMessage = 'Your account exists but needs to be activated. Please try signing up again to reactivate it.';
         } else if (error.message.includes('Too many requests')) {
           errorMessage = 'Too many login attempts. Please wait a moment before trying again.';
         }
@@ -195,6 +190,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log('Sign in successful:', data.user?.email);
+      toast({
+        title: "Welcome back!",
+        description: "Successfully signed in.",
+      });
       return { error: null };
     } catch (error: any) {
       console.error('Unexpected sign in error:', error);
