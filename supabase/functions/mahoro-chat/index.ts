@@ -1,169 +1,159 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-const SYSTEM_PROMPT = `You are Mahoro, a compassionate AI companion for HopeCore Hub, designed to provide trauma-informed support for survivors of gender-based violence (GBV), sexual and reproductive health (SRH) guidance, and mental health support in Rwanda.
-
-CORE PRINCIPLES:
-- Always respond with empathy, validation, and cultural sensitivity
-- Prioritize user safety and emotional well-being
-- Provide trauma-informed care principles
-- Respect Rwandan cultural contexts and values
-- Maintain hope and resilience-focused language
-
-LANGUAGE SUPPORT:
-- Respond in the same language the user communicates in
-- Support Kinyarwanda, English, French, and Swahili
-- Use culturally appropriate expressions and terminology
-
-CRISIS PROTOCOLS:
-- If user expresses immediate danger or suicidal thoughts, encourage them to contact:
-  * Isange One Stop Center: 3029
-  * Rwanda National Police: 3512
-  * HopeCore Team: +250780332779
-- Always validate their courage in reaching out
-
-RESPONSE GUIDELINES:
-- Keep responses supportive but concise (2-3 paragraphs max)
-- Offer practical coping strategies when appropriate
-- Suggest professional resources in Rwanda when needed
-- Never provide medical diagnoses or replace professional care
-- Focus on empowerment and healing
-
-Remember: You are here to listen, support, and guide users toward healing and resources, not to replace professional help.`;
+}
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { message, userId, sessionId, language = 'en' } = await req.json();
+    const { message, userId, sessionId, language = 'en' } = await req.json()
+    
+    console.log('Mahoro chat request:', {
+      userId,
+      sessionId,
+      language,
+      messageLength: message?.length
+    })
 
-    console.log('Mahoro chat request:', { userId, sessionId, language, messageLength: message?.length });
-
-    if (!message || !userId || !sessionId) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: message, userId, sessionId' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Get the Anthropic API key
+    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY')
+    if (!anthropicApiKey) {
+      throw new Error('ANTHROPIC_API_KEY is not configured')
     }
 
-    // Store user message
-    const { error: userMessageError } = await supabase
-      .from('chat_messages')
-      .insert({
-        user_id: userId,
-        session_id: sessionId,
-        message,
-        is_from_user: true,
-        language
-      });
+    // Determine if user is anonymous or authenticated
+    const isAnonymous = !userId || userId === 'anonymous'
+    const actualUserId = isAnonymous ? null : userId
 
-    if (userMessageError) {
-      console.error('Error storing user message:', userMessageError);
+    // Create a system prompt based on language
+    const systemPrompts = {
+      en: `You are Mahoro, a compassionate AI mental health support companion for HopeCore Hub. 
+      You provide emotional support, coping strategies, and encourage users to seek professional help when needed.
+      Always be empathetic, non-judgmental, and culturally sensitive. Keep responses concise but warm.
+      If someone is in crisis, direct them to emergency services or professional help.`,
+      
+      rw: `Uri Mahoro, umunyangazi w'ubwoba bwo gufasha abantu mu buzima bwabo. 
+      Utanga ubufasha mu mutima, amayeri yo guhangana n'ibibazo, kandi ushishikariza abantu gushaka ubufasha bw'abahanga igihe bikenewe.
+      Buri gihe wiyerekane nk'umunyangazi, udatekereza abantu, kandi wubaha umuco. Koresha amagambo make ariko yuzuye urukundo.
+      Niba umuntu afite ikibazo gikomeye, mumuherekeze kuri serivisi z'ubufasha bwihutirwa cyangwa abahanga.`,
+      
+      fr: `Vous êtes Mahoro, un compagnon d'IA compatissant pour le soutien en santé mentale chez HopeCore Hub.
+      Vous fournissez un soutien émotionnel, des stratégies d'adaptation et encouragez les utilisateurs à chercher une aide professionnelle si nécessaire.
+      Soyez toujours empathique, sans jugement et culturellement sensible. Gardez les réponses concises mais chaleureuses.
+      Si quelqu'un est en crise, dirigez-le vers les services d'urgence ou une aide professionnelle.`
     }
 
-    // Get conversation history (last 10 messages for context)
-    const { data: chatHistory, error: historyError } = await supabase
-      .from('chat_messages')
-      .select('message, is_from_user, created_at')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true })
-      .limit(10);
-
-    if (historyError) {
-      console.error('Error fetching chat history:', historyError);
-    }
-
-    // Build conversation context
-    const conversationHistory = chatHistory?.map(msg => ({
-      role: msg.is_from_user ? 'user' : 'assistant',
-      content: msg.message
-    })) || [];
-
-    // Add current message
-    conversationHistory.push({
-      role: 'user',
-      content: message
-    });
+    const systemPrompt = systemPrompts[language as keyof typeof systemPrompts] || systemPrompts.en
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${anthropicApiKey}`,
         'Content-Type': 'application/json',
         'x-api-key': anthropicApiKey,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: conversationHistory
-      }),
-    });
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 300,
+        messages: [
+          {
+            role: 'user',
+            content: message
+          }
+        ],
+        system: systemPrompt
+      })
+    })
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Claude API error:', response.status, errorText);
-      throw new Error(`Claude API error: ${response.status}`);
+      const errorText = await response.text()
+      console.error('Claude API error:', response.status, errorText)
+      throw new Error(`Claude API error: ${response.status}`)
     }
 
-    const data = await response.json();
-    const aiResponse = data.content[0].text;
+    const data = await response.json()
+    const aiMessage = data.content[0].text
 
-    console.log('Claude response received, length:', aiResponse?.length);
+    console.log('Claude response received, length:', aiMessage.length)
 
-    // Store AI response
-    const { error: aiMessageError } = await supabase
-      .from('chat_messages')
-      .insert({
-        user_id: userId,
-        session_id: sessionId,
-        message: aiResponse,
-        is_from_user: false,
-        language
-      });
+    // Only try to store messages if we have a valid user ID (not anonymous)
+    if (actualUserId && sessionId) {
+      try {
+        // Import Supabase client
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+        )
 
-    if (aiMessageError) {
-      console.error('Error storing AI message:', aiMessageError);
-    }
+        // Store user message
+        const { error: userMessageError } = await supabase
+          .from('chat_messages')
+          .insert({
+            user_id: actualUserId,
+            session_id: sessionId,
+            message: message,
+            is_from_user: true,
+            language: language
+          })
 
-    return new Response(
-      JSON.stringify({ 
-        response: aiResponse,
-        sessionId 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        if (userMessageError) {
+          console.error('Error storing user message:', userMessageError)
+        }
+
+        // Store AI response
+        const { error: aiMessageError } = await supabase
+          .from('chat_messages')
+          .insert({
+            user_id: actualUserId,
+            session_id: sessionId,
+            message: aiMessage,
+            is_from_user: false,
+            language: language
+          })
+
+        if (aiMessageError) {
+          console.error('Error storing AI message:', aiMessageError)
+        }
+      } catch (dbError) {
+        console.error('Database operation failed:', dbError)
+        // Continue without storing - don't fail the request
       }
-    );
+    } else {
+      console.log('Skipping message storage for anonymous user')
+    }
+
+    return new Response(JSON.stringify({ 
+      message: aiMessage,
+      success: true 
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      },
+    })
 
   } catch (error) {
-    console.error('Error in mahoro-chat function:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'I apologize, but I\'m having trouble responding right now. Please try again in a moment, or contact our support team if this continues.',
-        details: error.message 
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    console.error('Error in mahoro-chat:', error)
+    
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      success: false 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      },
+    })
   }
-});
+})

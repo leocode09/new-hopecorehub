@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,32 +27,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // Check for guest mode
+    // Check for guest mode first
     const guestMode = localStorage.getItem("hopecore-guest-mode");
     if (guestMode === "true") {
-      setIsGuest(true);
-      setLoading(false);
+      if (mounted) {
+        setIsGuest(true);
+        setLoading(false);
+        setUser(null);
+        setSession(null);
+      }
       return;
     }
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event, newSession) => {
         if (!mounted) return;
         
-        console.log('Auth state changed:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+        console.log('Auth state changed:', event, newSession?.user?.email);
+        
+        // Update state synchronously
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         setLoading(false);
         setIsGuest(false);
 
         // Clear guest mode when user signs in
-        if (session?.user) {
+        if (newSession?.user) {
           localStorage.removeItem("hopecore-guest-mode");
         }
 
-        // Handle specific auth events
-        if (event === 'SIGNED_IN' && session?.user) {
+        // Handle specific auth events with toast notifications
+        if (event === 'SIGNED_IN' && newSession?.user) {
           toast({
             title: "Welcome back!",
             description: "You've successfully signed in.",
@@ -61,6 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             title: "Signed out",
             description: "You've been successfully signed out.",
           });
+        } else if (event === 'USER_UPDATED' && newSession?.user) {
+          console.log('User updated:', newSession.user);
         }
       }
     );
@@ -68,13 +77,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting initial session:', error);
         }
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
           setLoading(false);
           setIsGuest(false);
         }
@@ -96,6 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
+      setLoading(true);
       console.log('Attempting to sign up user:', email);
       
       const { data, error } = await supabase.auth.signUp({
@@ -111,9 +121,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Sign up error:', error);
+        let errorMessage = error.message;
+        
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please sign in instead.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        }
+        
         toast({
           title: "Sign up failed",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive"
         });
         return { error };
@@ -142,11 +162,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive"
       });
       return { error };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
       console.log('Attempting to sign in user:', email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -182,6 +205,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive"
       });
       return { error };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -211,7 +236,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const switchToAccountMode = () => {
     localStorage.removeItem("hopecore-guest-mode");
     setIsGuest(false);
-    // Don't redirect automatically - let user choose next action
   };
 
   return (

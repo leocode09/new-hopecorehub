@@ -32,85 +32,73 @@ Deno.serve(async (req) => {
     const payload = await req.text();
     const headers = Object.fromEntries(req.headers);
     
+    let userEmail: string;
+    let token: string;
+    let tokenHash: string;
+    let redirectTo: string;
+    let emailActionType: string;
+
     // If webhook secret is configured, verify the webhook
     if (hookSecret) {
-      const wh = new Webhook(hookSecret);
       try {
-        const {
-          user,
-          email_data: { token, token_hash, redirect_to, email_action_type },
-        } = wh.verify(payload, headers) as {
-          user: { email: string };
-          email_data: {
-            token: string;
-            token_hash: string;
-            redirect_to: string;
-            email_action_type: string;
-          };
-        };
-
-        console.log(`Sending confirmation email to: ${user.email}`);
-
-        const html = await renderAsync(
-          React.createElement(SignupConfirmationEmail, {
-            supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-            token,
-            token_hash,
-            redirect_to: redirect_to || `${Deno.env.get('SUPABASE_URL')}/auth/callback`,
-            email_action_type,
-            user_email: user.email,
-          })
-        );
-
-        const { error } = await resend.emails.send({
-          from: 'HopeCore Hub <noreply@hopecorehub.com>',
-          to: [user.email],
-          subject: 'Welcome to HopeCore Hub - Confirm Your Account',
-          html,
-        });
-
-        if (error) {
-          console.error('Resend error:', error);
-          throw error;
+        const webhookData = new Webhook(hookSecret).verify(payload, headers) as any;
+        console.log('Webhook data:', JSON.stringify(webhookData, null, 2));
+        
+        userEmail = webhookData.user?.email;
+        token = webhookData.email_data?.token;
+        tokenHash = webhookData.email_data?.token_hash;
+        redirectTo = webhookData.email_data?.redirect_to;
+        emailActionType = webhookData.email_data?.email_action_type;
+        
+        if (!userEmail) {
+          console.error('No user email found in webhook payload');
+          throw new Error('User email not found in webhook payload');
         }
-
-        console.log('Confirmation email sent successfully');
       } catch (webhookError) {
         console.error('Webhook verification failed:', webhookError);
-        throw new Error('Invalid webhook signature');
+        throw new Error('Invalid webhook signature or payload');
       }
     } else {
       // Fallback for direct API calls (for testing)
       const body = JSON.parse(payload);
-      const { email, token, token_hash, redirect_to, email_action_type } = body;
-
-      console.log(`Sending confirmation email to: ${email}`);
-
-      const html = await renderAsync(
-        React.createElement(SignupConfirmationEmail, {
-          supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
-          token,
-          token_hash,
-          redirect_to: redirect_to || `${Deno.env.get('SUPABASE_URL')}/auth/callback`,
-          email_action_type: email_action_type || 'signup',
-          user_email: email,
-        })
-      );
-
-      const { error } = await resend.emails.send({
-        from: 'HopeCore Hub <noreply@hopecorehub.com>',
-        to: [email],
-        subject: 'Welcome to HopeCore Hub - Confirm Your Account',
-        html,
-      });
-
-      if (error) {
-        console.error('Resend error:', error);
-        throw error;
-      }
-
-      console.log('Confirmation email sent successfully');
+      userEmail = body.email;
+      token = body.token;
+      tokenHash = body.token_hash;
+      redirectTo = body.redirect_to;
+      emailActionType = body.email_action_type || 'signup';
     }
+
+    if (!userEmail) {
+      console.error('User email is required but not provided');
+      throw new Error('User email is required');
+    }
+
+    console.log(`Sending confirmation email to: ${userEmail}`);
+
+    const html = await renderAsync(
+      React.createElement(SignupConfirmationEmail, {
+        supabase_url: Deno.env.get('SUPABASE_URL') ?? '',
+        token: token || '',
+        token_hash: tokenHash || '',
+        redirect_to: redirectTo || `${Deno.env.get('SUPABASE_URL')}/auth/callback`,
+        email_action_type: emailActionType || 'signup',
+        user_email: userEmail,
+      })
+    );
+
+    const { error } = await resend.emails.send({
+      from: 'HopeCore Hub <noreply@hopecorehub.com>',
+      to: [userEmail],
+      subject: 'Welcome to HopeCore Hub - Confirm Your Account',
+      html,
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      throw error;
+    }
+
+    console.log('Confirmation email sent successfully');
 
     return new Response(
       JSON.stringify({ success: true, message: 'Email sent successfully' }),
