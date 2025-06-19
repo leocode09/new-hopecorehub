@@ -8,12 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, Heart, ArrowLeft, Loader2 } from "lucide-react";
+import { Shield, Heart, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const Welcome = () => {
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,6 +24,16 @@ const Welcome = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both email and password.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!consentGiven) {
       setShowConsent(true);
       return;
@@ -32,17 +41,7 @@ const Welcome = () => {
     
     setLoading(true);
     try {
-      const identifier = email || phone;
-      if (!identifier || !password) {
-        toast({
-          title: "Missing Information",
-          description: "Please enter both email/phone and password.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const { error } = await signIn(identifier, password);
+      const { error } = await signIn(email, password);
       if (!error) {
         toast({
           title: "Welcome back!",
@@ -57,6 +56,25 @@ const Welcome = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both email and password.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!consentGiven) {
       setShowConsent(true);
       return;
@@ -64,32 +82,15 @@ const Welcome = () => {
     
     setLoading(true);
     try {
-      const identifier = email || phone;
-      if (!identifier || !password) {
-        toast({
-          title: "Missing Information",
-          description: "Please enter both email/phone and password.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (password.length < 6) {
-        toast({
-          title: "Password Too Short",
-          description: "Password must be at least 6 characters long.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      const { error } = await signUp(identifier, password, fullName);
+      const { error } = await signUp(email, password, fullName || 'Anonymous User');
       if (!error) {
         toast({
           title: "Account Created!",
-          description: "Please check your email to confirm your account.",
+          description: "You can now sign in with your credentials.",
         });
-        // Don't navigate immediately for signup - wait for email confirmation
+        // Switch to sign in tab after successful signup
+        setAuthType('signin');
+        setPassword(''); // Clear password for security
       }
     } finally {
       setLoading(false);
@@ -101,7 +102,7 @@ const Welcome = () => {
       setShowConsent(true);
       return;
     }
-    // Store guest mode in localStorage
+    
     localStorage.setItem("hopecore-guest-mode", "true");
     toast({
       title: "Welcome Guest!",
@@ -213,24 +214,15 @@ const Welcome = () => {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email or Phone</Label>
+                  <Label htmlFor="signin-email">Email</Label>
                   <Input
                     id="signin-email"
-                    type="text"
-                    value={email || phone}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.includes('@')) {
-                        setEmail(value);
-                        setPhone('');
-                      } else {
-                        setPhone(value);
-                        setEmail('');
-                      }
-                    }}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={loading}
-                    placeholder="your@email.com or +250123456789"
+                    placeholder="your@email.com"
                   />
                 </div>
                 <div className="space-y-2">
@@ -277,24 +269,15 @@ const Welcome = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email or Phone</Label>
+                  <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
-                    type="text"
-                    value={email || phone}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.includes('@')) {
-                        setEmail(value);
-                        setPhone('');
-                      } else {
-                        setPhone(value);
-                        setEmail('');
-                      }
-                    }}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={loading}
-                    placeholder="your@email.com or +250123456789"
+                    placeholder="your@email.com"
                   />
                 </div>
                 <div className="space-y-2">

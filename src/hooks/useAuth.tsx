@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         console.log('Auth state changed:', event, newSession?.user?.email);
         
-        // Update state synchronously
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setLoading(false);
@@ -58,7 +57,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem("hopecore-guest-mode");
         }
 
-        // Handle specific auth events with toast notifications
         if (event === 'SIGNED_IN' && newSession?.user) {
           console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
@@ -137,12 +135,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log('Sign up response:', { user: data.user?.email, session: !!data.session });
 
+      // For simplified flow, we'll allow immediate sign in after signup
       if (data.user && !data.session) {
-        // User needs to confirm email
-        console.log('User created, email confirmation required');
+        console.log('User created, but no immediate session - this is normal');
+        toast({
+          title: "Account created successfully!",
+          description: "You can now sign in with your credentials.",
+        });
       } else if (data.session) {
-        // User was signed up and signed in immediately
         console.log('User created and signed in immediately');
+        toast({
+          title: "Welcome to HopeCore Hub!",
+          description: "Your account has been created successfully.",
+        });
       }
 
       return { error: null };
