@@ -39,6 +39,11 @@ jobs:
         run: |
           npx @capacitor/cli sync
 
+      - name: Make Gradle wrapper executable
+        run: |
+          cd android
+          chmod +x ./gradlew
+
       - name: Build Android APK
         run: |
           cd android
