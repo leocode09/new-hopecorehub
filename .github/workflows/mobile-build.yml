@@ -55,12 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: Download Android APK
-        uses: actions/download-artifact@v4
-        with:
-          name: app-debug
-          path: artifacts/android
-
       - name: Download iOS App
         uses: actions/download-artifact@v4
         with:
@@ -80,8 +74,7 @@ jobs:
           name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
-          files: |
-            artifacts/android/app-debug.apk
+          files:
             ios-app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
